@@ -1,0 +1,41 @@
+# Example scenario with Jian et al. Likert scale questionnaire
+# This shows how to add the questionnaire before and after the main task
+
+# PRE-TASK QUESTIONNAIRE
+# Display the Jian et al. Likert scale questionnaire before the task starts
+0:00:00;genericscales;filename;jian_et_al_likert_scale.txt
+0:00:00;genericscales;start
+
+# Wait for questionnaire completion (user presses SPACE to finish)
+# The questionnaire will automatically stop when user completes it
+
+# MAIN TASK BEGINS
+# Start the main MATB tasks after questionnaire completion
+0:00:00;chrono;start
+0:00:00;resman;start
+0:00:00;track;start
+0:00:00;sysmon;start
+0:00:00;communications;start
+
+# Example task events
+0:00:10;resman;pump-1-state;failure
+0:00:15;sysmon;scales-1-failure;True
+0:00:20;communications;radioprompt;own
+
+# More task events...
+0:02:00;resman;pump-1-state;off
+0:02:05;sysmon;scales-1-failure;False
+
+# MAIN TASK ENDS
+0:03:00;resman;stop
+0:03:00;track;stop
+0:03:00;sysmon;stop
+0:03:00;communications;stop
+0:03:00;chrono;stop
+
+# POST-TASK QUESTIONNAIRE
+# Display the same questionnaire after the task is complete
+0:03:00;genericscales;filename;jian_et_al_likert_scale.txt
+0:03:00;genericscales;start
+
+# End of scenario

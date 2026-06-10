@@ -1,0 +1,251 @@
+# OpenMATB scenario: Practice task - 15 min MANUAL + 5 min AUTO = 20 min total
+# Definition: MANUAL = all 3 tasks manual (sysmon, comms, tracking)
+#             AUTO   = sysmon + comms automated, tracking remains manual
+# Sysmon/comms failure: 1 event every ~27s throughout
+# Tracking: always manual (joystick/keyboard)
+
+0:00:00;healthbar;start
+0:20:00;healthbar;stop
+
+# ============================================================
+# SECTION 1: MANUAL (0:00 - 15:00)
+# ============================================================
+0:00:00;sysmon;automaticsolver;False
+0:00:00;sysmon;displayautomationstate;True
+0:00:00;sysmon;automationlabel;MANUAL
+0:00:00;sysmon;automaticsolverdelay;2000
+
+0:00:00;track;automaticsolver;False
+0:00:00;track;displayautomationstate;True
+0:00:00;track;taskplacement;topright
+
+0:00:00;communications;automaticsolver;False
+0:00:00;communications;displayautomationstate;True
+0:00:00;communications;automationlabel;MANUAL
+
+0:00:00;communications;callsignregex;[A-Z][A-Z][A-Z]\d\d\d
+0:00:00;communications;othercallsignnumber;5
+0:00:00;communications;voicegender;male
+0:00:00;communications;voiceidiom;english
+
+0:00:00;communications;start
+0:00:00;sysmon;start
+0:00:00;performance;start
+0:00:00;performance;hide
+0:00:00;track;start
+
+# ============================================================
+# SECTION 2: AUTO (15:00 - 20:00)
+# sysmon + comms automation ON; tracking stays manual
+# ============================================================
+0:15:00;sysmon;automaticsolver;True
+0:15:00;sysmon;automationlabel;AUTO
+0:15:00;communications;automaticsolver;True
+0:15:00;communications;automationlabel;AUTO
+
+# ============================================================
+# SYSMON FAILURES  (~1 every 27s throughout)
+# ============================================================
+
+# --- 0:00 - 5:00 ---
+0:00:10;sysmon;lights-2-failure;True
+0:00:27;sysmon;lights-1-failure;True
+0:00:55;sysmon;scales-2-side;-1
+0:00:55;sysmon;scales-2-failure;True
+0:01:22;sysmon;lights-2-failure;True
+0:01:48;sysmon;scales-1-side;1
+0:01:48;sysmon;scales-1-failure;True
+0:02:16;sysmon;scales-3-side;1
+0:02:16;sysmon;scales-3-failure;True
+0:02:43;sysmon;lights-1-failure;True
+0:03:11;sysmon;scales-4-side;-1
+0:03:11;sysmon;scales-4-failure;True
+0:03:38;sysmon;lights-2-failure;True
+0:04:06;sysmon;scales-2-side;1
+0:04:06;sysmon;scales-2-failure;True
+0:04:33;sysmon;scales-1-side;-1
+0:04:33;sysmon;scales-1-failure;True
+
+# --- 5:00 - 10:00 ---
+0:05:01;sysmon;lights-1-failure;True
+0:05:28;sysmon;scales-3-side;-1
+0:05:28;sysmon;scales-3-failure;True
+0:05:56;sysmon;lights-2-failure;True
+0:06:23;sysmon;scales-4-side;1
+0:06:23;sysmon;scales-4-failure;True
+0:06:51;sysmon;lights-1-failure;True
+0:07:18;sysmon;scales-2-side;-1
+0:07:18;sysmon;scales-2-failure;True
+0:07:46;sysmon;lights-2-failure;True
+0:08:13;sysmon;scales-1-side;1
+0:08:13;sysmon;scales-1-failure;True
+0:08:41;sysmon;scales-3-side;1
+0:08:41;sysmon;scales-3-failure;True
+0:09:08;sysmon;lights-1-failure;True
+0:09:36;sysmon;scales-4-side;-1
+0:09:36;sysmon;scales-4-failure;True
+
+# --- 10:00 - 15:00 ---
+0:10:03;sysmon;lights-2-failure;True
+0:10:31;sysmon;scales-2-side;1
+0:10:31;sysmon;scales-2-failure;True
+0:10:58;sysmon;scales-1-side;-1
+0:10:58;sysmon;scales-1-failure;True
+0:11:26;sysmon;lights-1-failure;True
+0:11:53;sysmon;scales-3-side;-1
+0:11:53;sysmon;scales-3-failure;True
+0:12:21;sysmon;lights-2-failure;True
+0:12:48;sysmon;scales-4-side;1
+0:12:48;sysmon;scales-4-failure;True
+0:13:16;sysmon;lights-1-failure;True
+0:13:43;sysmon;scales-2-side;-1
+0:13:43;sysmon;scales-2-failure;True
+0:14:11;sysmon;lights-2-failure;True
+0:14:38;sysmon;scales-1-side;1
+0:14:38;sysmon;scales-1-failure;True
+
+# --- 15:00 - 20:00 (auto handles all) ---
+0:15:06;sysmon;scales-3-side;1
+0:15:06;sysmon;scales-3-failure;True
+0:15:33;sysmon;lights-1-failure;True
+0:16:01;sysmon;scales-4-side;-1
+0:16:01;sysmon;scales-4-failure;True
+0:16:28;sysmon;lights-2-failure;True
+0:16:56;sysmon;scales-2-side;1
+0:16:56;sysmon;scales-2-failure;True
+0:17:23;sysmon;scales-1-side;-1
+0:17:23;sysmon;scales-1-failure;True
+0:17:51;sysmon;lights-1-failure;True
+0:18:18;sysmon;scales-3-side;-1
+0:18:18;sysmon;scales-3-failure;True
+0:18:46;sysmon;lights-2-failure;True
+0:19:13;sysmon;scales-4-side;1
+0:19:13;sysmon;scales-4-failure;True
+0:19:41;sysmon;lights-1-failure;True
+
+# ============================================================
+# COMMUNICATIONS PROMPTS (~1 own callsign every 50-60s)
+# ============================================================
+
+# --- 0:00 - 10:00 ---
+0:00:15;communications;radioprompt;own
+0:01:07;communications;radioprompt;other
+0:01:33;communications;radioprompt;other
+0:02:10;communications;radioprompt;own
+0:02:49;communications;radioprompt;other
+0:03:08;communications;radioprompt;other
+0:03:20;communications;radioprompt;other
+0:03:35;communications;radioprompt;own
+0:04:08;communications;radioprompt;other
+0:04:21;communications;radioprompt;other
+0:04:51;communications;radioprompt;own
+0:05:41;communications;radioprompt;own
+0:06:22;communications;radioprompt;own
+0:06:51;communications;radioprompt;own
+0:07:36;communications;radioprompt;other
+0:08:11;communications;radioprompt;own
+0:08:47;communications;radioprompt;other
+0:09:11;communications;radioprompt;own
+0:09:48;communications;radioprompt;other
+
+# --- 10:00 - 15:00 ---
+0:10:19;communications;radioprompt;own
+0:11:06;communications;radioprompt;other
+0:11:24;communications;radioprompt;own
+0:12:11;communications;radioprompt;other
+0:12:35;communications;radioprompt;other
+0:13:05;communications;radioprompt;own
+0:13:45;communications;radioprompt;own
+0:14:13;communications;radioprompt;other
+0:14:36;communications;radioprompt;other
+
+# --- 15:00 - 20:00 (auto handles all) ---
+0:15:08;communications;radioprompt;other
+0:15:45;communications;radioprompt;other
+0:16:11;communications;radioprompt;own
+0:16:45;communications;radioprompt;other
+0:17:10;communications;radioprompt;own
+0:17:50;communications;radioprompt;other
+0:18:22;communications;radioprompt;own
+0:18:52;communications;radioprompt;own
+0:19:17;communications;radioprompt;own
+
+# ============================================================
+# SYSMON REPORTS (every 20s)
+# ============================================================
+0:00:20;sysmon;report
+0:00:40;sysmon;report
+0:01:00;sysmon;report
+0:01:20;sysmon;report
+0:01:40;sysmon;report
+0:02:00;sysmon;report
+0:02:20;sysmon;report
+0:02:40;sysmon;report
+0:03:00;sysmon;report
+0:03:20;sysmon;report
+0:03:40;sysmon;report
+0:04:00;sysmon;report
+0:04:20;sysmon;report
+0:04:40;sysmon;report
+0:05:00;sysmon;report
+0:05:20;sysmon;report
+0:05:40;sysmon;report
+0:06:00;sysmon;report
+0:06:20;sysmon;report
+0:06:40;sysmon;report
+0:07:00;sysmon;report
+0:07:20;sysmon;report
+0:07:40;sysmon;report
+0:08:00;sysmon;report
+0:08:20;sysmon;report
+0:08:40;sysmon;report
+0:09:00;sysmon;report
+0:09:20;sysmon;report
+0:09:40;sysmon;report
+0:10:00;sysmon;report
+0:10:20;sysmon;report
+0:10:40;sysmon;report
+0:11:00;sysmon;report
+0:11:20;sysmon;report
+0:11:40;sysmon;report
+0:12:00;sysmon;report
+0:12:20;sysmon;report
+0:12:40;sysmon;report
+0:13:00;sysmon;report
+0:13:20;sysmon;report
+0:13:40;sysmon;report
+0:14:00;sysmon;report
+0:14:20;sysmon;report
+0:14:40;sysmon;report
+0:15:00;sysmon;report
+0:15:20;sysmon;report
+0:15:40;sysmon;report
+0:16:00;sysmon;report
+0:16:20;sysmon;report
+0:16:40;sysmon;report
+0:17:00;sysmon;report
+0:17:20;sysmon;report
+0:17:40;sysmon;report
+0:18:00;sysmon;report
+0:18:20;sysmon;report
+0:18:40;sysmon;report
+0:19:00;sysmon;report
+0:19:20;sysmon;report
+0:19:40;sysmon;report
+0:20:00;sysmon;report
+
+# ============================================================
+# PERFORMANCE SUMMARY
+# ============================================================
+0:05:00;performance;show_summary
+0:10:00;performance;show_summary
+0:15:00;performance;show_summary
+0:19:59;performance;show_summary
+
+# ============================================================
+# STOP
+# ============================================================
+0:20:00;sysmon;stop
+0:20:00;track;stop
+0:20:00;communications;stop
+0:20:00;performance;stop

@@ -1,0 +1,12 @@
+sessions
+last_scenario_errors.log
+.venv
+venv
+__pycache__
+capture.sublime-workspace
+audio_matb
+*.odt
+build/
+release/
+.cursor/
+imotions/manual.txt

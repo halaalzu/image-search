@@ -1,0 +1,50 @@
+# ===========================================
+# OpenMATB - I3F3 Alternating Auto (ON/OFF only)
+# 6-minute trial. Tracking manual. SysMon, Comms, ResMan get failures.
+# Windows: 00:30–01:30 (ON), 02:00–03:00 (OFF), 04:00–05:00 (ON)
+# ===========================================
+
+0:00:00;chrono;start
+
+# 1 Global parameters (no automation badges shown)
+# 1.a SysMon
+0:00:00;sysmon;feedbacks-positive-active;True
+0:00:00;sysmon;feedbacks-negative-active;True
+# no displayautomationstate here
+0:00:00;sysmon;automaticsolver;False
+
+# 1.b ResMan
+0:00:00;resman;tank-b-target;2500
+0:00:00;resman;tolerancecoloroutside;#ff0000
+# no displayautomationstate here
+0:00:00;resman;automaticsolver;False
+
+# 1.c Tracking
+0:00:00;track;cursorcolor;#37FD12
+
+# 1.d Comms
+0:00:00;communications;callsignregex;[A-Z][A-Z][A-Z]\d\d\d
+0:00:00;communications;othercallsignnumber;8
+0:00:00;communications;voicegender;male
+0:00:00;communications;voiceidiom;english
+# no displayautomationstate here
+0:00:00;communications;automaticsolver;False
+
+# 2 Start tasks
+0:00:00;resman;start
+0:00:00;track;start
+0:00:00;sysmon;start
+0:00:00;communications;start
+
+# 3 Failure windows (F3): ON / OFF / ON / OFF / ON / OFF 60s trials
+# Failures appear at 15s into block, auto will resolve after 5 seconds if ON block
+# OFF Block, Auto turns on! but no change is indicated
+# ---- Window 1 (AUTO ON): 00:30–01:30 ----
+
+
+# 4 End (6:00)
+0:06:00;resman;stop
+0:06:00;track;stop
+0:06:00;sysmon;stop
+0:06:00;communications;stop
+0:06:00;chrono;stop

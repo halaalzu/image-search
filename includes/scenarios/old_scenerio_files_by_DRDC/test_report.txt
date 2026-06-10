@@ -1,0 +1,18 @@
+# Test scenario for sysmon report feature
+# This scenario demonstrates how to use the new report functionality
+# The report now shows with a dark red background, white text, and black border
+
+# Start sysmon plugin
+0:00:01;sysmon;start
+
+# Show report at 30 seconds (7 second duration)
+0:00:30;sysmon;report
+
+# Show another report at 1 minute
+0:01:00;sysmon;report
+
+# Show a third report at 2 minutes
+0:02:00;sysmon;report
+
+# Stop the scenario
+0:03:00;sysmon;stop

@@ -1,0 +1,14 @@
+Use a 7-point LIkert response scale: 1 (Not at all) to 7 (Extremely)
+
+The system is deceptive
+The system behaves in an underhanded manner
+I am suspicious of the system’s intent, action, or output
+I am wary of the system
+The system’s action will have a harmful or injurious outcome
+I am confident in the system
+The system provides security
+The system has integrity
+The system is dependable
+The system is reliable
+I can trust the system
+I am familiar with the system

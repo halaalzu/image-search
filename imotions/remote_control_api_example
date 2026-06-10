@@ -1,0 +1,115 @@
+import io
+import os
+import socket
+import time
+
+
+class ImotionsApiError(Exception):
+    pass
+
+
+class ControlImotions:
+    """
+    Send commands to the iMotions software to control the running study and perform administrative tasks via the "Remote Control API".
+    """
+    _socket: socket.socket
+    _stream: io.TextIOWrapper
+
+    def __init__(self, ip=None, port=None, connect_timeout=3.0, retries=3, retry_delay=1.0):
+        ip = ip or os.getenv("IMOTIONS_HOST", "127.0.0.1")
+        port = int(port or os.getenv("IMOTIONS_PORT", "8087"))
+        print(f"Remote control api connecting to iMotions on {ip}:{port}")
+        self._socket = None
+        last_error = None
+        for attempt in range(1, int(retries) + 1):
+            try:
+                self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self._socket.settimeout(float(connect_timeout))
+                self._socket.connect((ip, port))
+                last_error = None
+                break
+            except (TimeoutError, OSError) as err:
+                last_error = err
+                if self._socket is not None:
+                    try:
+                        self._socket.close()
+                    except OSError:
+                        pass
+                    self._socket = None
+                if attempt < retries:
+                    print(f"Connection attempt {attempt}/{retries} failed ({err}), retrying...")
+                    time.sleep(float(retry_delay))
+
+        if last_error is not None:
+            raise ImotionsApiError(
+                "Unable to connect to iMotions software.\n"
+                f"Target: {ip}:{port}\n"
+                f"Last socket error: {last_error}\n"
+                "Checklist:\n"
+                "1) iMotions is running on the target PC\n"
+                "2) Remote Control API is enabled in iMotions settings\n"
+                "3) Port matches iMotions config (default 8087)\n"
+                "4) You can route to the host (same VPN/LAN/subnet)\n"
+                "5) Firewall allows inbound TCP on that port"
+            )
+        if self._socket is None:
+            raise ImotionsApiError("Socket initialization failed before connection.")
+        self._stream = self._socket.makefile(mode="r", encoding="utf-8")
+
+    def _send(self, msg: list[str]):
+        self._socket.sendall(f"{';'.join(msg)}\r\n".encode("utf-8"))
+        raw_line = self._stream.readline()
+        if raw_line == "":
+            raise ImotionsApiError("Connection closed by iMotions before a response was received.")
+        line = raw_line.rstrip("\n").split(";")
+        if len(line) >= 8:
+            status = line[6]
+            error = line[7]
+            if status == "0":
+                print(error)
+                raise ImotionsApiError(error)
+        else:
+            print(f"Unexpected reply length {line}")
+        return line
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._stream.close()
+        self._socket.shutdown(socket.SHUT_RDWR)
+        self._socket.close()
+
+    def run_study(self, study_name: str, respondent_name: str):
+        return self._send(["R", "3", "", "RUN", study_name, respondent_name, f"Gender=Other Age=1", "NoPromptIgnoreWarnings"])
+
+    def next_stimulus(self):
+        return self._send(["R", "1", "", "SLIDESHOWNEXT"])
+
+    def cancel_study(self):
+        return self._send(["R", "1", "", "SLIDESHOWCANCEL"])
+
+    def status(self) -> tuple[bool, str]:
+        line = self._send(["R", "4", "", "STATUS"])
+        is_busy = line[11] == "1"
+        status_text = line[12]
+        return is_busy, status_text
+
+    def minimize(self):
+        return self._send(["R", "1", "", "MIN"])
+
+    def maximize(self):
+        return self._send(["R", "1", "", "MAX"])
+
+    def shutdown(self):
+        return self._send(["R", "1", "", "SHUTDOWN"])
+
+    def load_study(self, path: str, name: str, mode = "Auto"):
+        return self._send(["R", "1", "", "LOAD", path, name, mode])
+
+
+if __name__ == "__main__":
+    # Keep this script as a simple connectivity smoke test only.
+    with ControlImotions() as imotions:
+        busy, status_text = imotions.status()
+        print(f"Connected. Busy={busy}. Status={status_text}")

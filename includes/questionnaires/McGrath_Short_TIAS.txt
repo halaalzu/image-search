@@ -1,0 +1,17 @@
+# This is a scale template
+
+# For each item, you must indicate the question, the name of the minimal scale value (e.g., Very Low), the name of the maximal scale value (e.g., Very high), as well as the minimum, maximum and default values for each question.
+
+# There are several commands that you might use to adapt the questionnaire to your needs.
+#   The <title> command will display a title
+#   The <newpage> command will split the questionnaire into multiple parts
+
+# Each item must be formatted like the following :
+# Question;minimumName/maximumName;minimumValue/maximumValue/defaultValue
+# Here are some examples, with a <break> command.
+
+<title>Short_TIAS_McGrath
+confidence;I am confident in the AI assistant;Not at all/Extremely;1/7/4
+reliable;The AI assistant is reliable;Not at all/Extremely;1/7/4
+trust;I can trust the AI assistant;Not at all/Extremely;1/7/4
+

@@ -1,0 +1,15 @@
+<title>General Trust in Automation
+instruction;On the next page please rate how you generally feel about automated systems and automated technologies in everyday life.;I don't Understand/I Understand;0/1/0
+<newpage>
+reliable;Automated systems are generally reliable.;Not at all/Extremely;1/7/4
+dependable;Automated systems behave in ways I consider dependable.;Not at all/Extremely;1/7/4
+works_as_intended;Automation usually works as intended.;Not at all/Extremely;1/7/4
+<newpage>
+uneasy(R);I feel uneasy relying on automation.;Not at all/Extremely;1/7/4
+comfortable;I am comfortable letting automation handle important parts of a task.;Not at all/Extremely;1/7/4
+worry(R);I often worry that automation will fail when needed.;Not at all/Extremely;1/7/4
+<newpage>
+predictable;I usually have a good sense of what automation is doing and why.;Not at all/Extremely;1/7/4
+hard_to_predict(R);Automation often behaves unpredictably.;Not at all/Extremely;1/7/4
+overall_trust;Overall, I tend to trust automation.;Not at all/Extremely;1/7/4
+skeptical(R);In general, I am skeptical about automation.;Not at all/Extremely;1/7/4

@@ -1,0 +1,5 @@
+I am wary of the system;I am wary of the system;Not at all/Extremely;1/7/4
+I am confident in the system;I am confident in the system;Not at all/Extremely;1/7/4
+The system is dependable;The system is dependable;Not at all/Extremely;1/7/4
+The system is reliable;The system is reliable;Not at all/Extremely;1/7/4
+I can trust the system;I can trust the system;Not at all/Extremely;1/7/4

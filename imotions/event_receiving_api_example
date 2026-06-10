@@ -1,0 +1,89 @@
+import math
+import socket
+import time
+
+
+class SendToImotions:
+    """
+    Send sensor data and markers to the iMotions software that will be inserted into the running study via the "Event Receiving API".
+    """
+    _socket: socket.socket
+
+    def __init__(self, ip="127.0.0.1", port=8089):
+        print(f"Connecting to iMotions on TCP {ip}:{port}")
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._socket.connect((ip, port))
+
+    def _send(self, msg: list):
+        self._socket.sendall(f"{';'.join(map(str, msg))}\r\n".encode("utf-8"))
+
+    def _sanitize(self, text: str):
+        return text.replace(";", "_")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._socket.shutdown(socket.SHUT_RDWR)
+        self._socket.close()
+
+    def marker(self, name: str, description=""):
+        """
+        Send a marker for a single standalone event.
+        """
+        self._send(["M", "2", "", "", self._sanitize(name), self._sanitize(description), "D", ""])
+
+    def start_scene_image(self, name: str, description=""):
+        """
+        Send the start of an image scene.
+        An image scene is visually identical for the duration (regardless of whether that is because it is an actual image, or a still scene in a video).
+        """
+        self._send(["M", "2", "", "", self._sanitize(name), self._sanitize(description), "N", "I"])
+
+    def start_scene_video(self, name: str, description=""):
+        """
+        Send the start of a video scene.
+        """
+        self._send(["M", "2", "", "", self._sanitize(name), self._sanitize(description), "N", "V"])
+
+    def end_scene(self, name: str):
+        """
+        Send the end of a previously started scene.
+        """
+        self._send(["M", "2", "", "", self._sanitize(name), "", "E", ""])
+
+    def data(self, event_source_id: str, sample_id: str, data: list, version="1"):
+        """
+        Send sensor data.
+        :param event_source_id: Sensor event source ID, i.e. the Id attribute of the EventSource tag.
+        :param sample_id: Sensor sample ID, i.e. the Id attribute of the Sample tag.
+        :param data: Data for the sample's fields, in the same order as they appear in the XML file.
+        """
+        self._send(["E", "1", event_source_id, version, "", "", "", sample_id, *data])
+
+    def define_data(self, xml: str):
+        """
+        Send an XML snippet that defines an event source for data.
+        """
+        self._send(["D", f"1\r\n{xml}\r\n"])
+
+
+with SendToImotions() as imotions:
+    xml = """
+<EventSource Id="demo_source" Version="1" Name="Demo Source">
+    <Sample Id="demo_sample" Name="Demo Sample">
+        <Field Id="demo_field1"></Field>
+        <Field Id="demo_field2"></Field>
+    </Sample>
+</EventSource> 
+    """.strip()
+
+    imotions.define_data(xml)
+
+    while True:
+        value1 = math.sin(time.time() * math.pi)
+        value2 = math.cos(time.time() * math.pi)
+
+        imotions.data("demo_source", "demo_sample", [value1, value2])
+
+        time.sleep(0.1)
