@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: white;
+            color: black;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 { font-size: 2rem; margin: 20px 0; }
+        p { font-size: 1rem; margin: 10px 0; line-height: 1.5; }
+
+        .instruction-box {
+            background: #f0f0f0;
+            border-left: 4px solid #333;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+
+        .instruction-box strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            margin: 10px 5px;
+            cursor: pointer;
+            border: none;
+            background: #333;
+            color: white;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            background: #555;
+        }
+
+        .transcript-box {
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 1rem;
+            min-height: 50px;
+        }
+
+        .feedback {
+            padding: 12px;
+            margin: 10px 0;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        #start-screen {
+            text-align: center;
+        }
+
+        #test-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        #slideshow-area {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            padding: 0;
+        }
+
+        #slideshow-area.active {
+            display: block;
+        }
+
+        #photo-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #current-photo {
+            max-width: 100vw;
+            max-height: 100vh;
+            object-fit: contain;
+        }
+
+        #photo-instruction {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px 30px;
+            font-size: 1.5rem;
+            text-align: center;
+            z-index: 50;
+        }
+
+        #modal-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #modal-overlay.show {
+            display: flex;
+        }
+
+        #answer-modal {
+            background: #ccc;
+            padding: 40px;
+            max-width: 500px;
+            width: 80%;
+            text-align: center;
+        }
+
+        #answer-modal h2 {
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            color: #000;
+        }
+
+        #transcript {
+            background: #aaa;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.95rem;
+            color: #000;
+            min-height: 40px;
+        }
+
+        .feedback-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 12px;
+            margin: 10px 0;
+        }
+
+        .feedback-text.correct {
+            background: #90EE90;
+            color: #000;
+        }
+
+        .feedback-text.incorrect {
+            background: #FFB6C6;
+            color: #000;
+        }
+
+        #countdown {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #000;
+            margin-top: 10px;
+        }
+
+        #done-screen {
+            display: none;
+            text-align: center;
+            font-size: 3rem;
+            padding: 100px 20px;
+        }
+
+        #done-screen.active {
+            display: block;
+        }
+
+        #automation-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #d3d3d3;
+            border: 3px solid #808080;
+            padding: 40px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 150;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        #automation-popup.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        #automation-popup p {
+            margin: 0;
+            color: #404040;
+        }
+
+        #automation-popup .label {
+            font-size: 0.8rem;
+            color: #404040;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        #automation-popup .answer {
+            font-size: 2.2rem;
+            color: #606060;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="instructions-screen" class="container" style="display:block;">
+        <h1>Task Instructions</h1>
+        <div class="instruction-box">
+            <strong>Your Task:</strong><br><br>
+            You will see photos of vehicles. For each photo, count the vehicles and respond by saying:<br><br>
+            <strong>"There are [NUMBER] [COLOR] [VEHICLE]"</strong><br><br>
+            Examples:<br>
+            • "There are 4 blue cars"<br>
+            • "There are 5 red trucks"<br>
+            • "There are 3 green cars"
+        </div>
+        <div class="instruction-box">
+            <strong>How it works:</strong><br><br>
+            1. A photo will appear on screen<br>
+            2. Say your answer in the format above<br>
+            3. Your answer will be shown<br>
+            4. Move to the next photo
+        </div>
+        <div class="instruction-box">
+            <strong>AI Assistance:</strong><br><br>
+            An AI will also try to count the objects and provide suggested answers; these suggestions are optional and shown to help you.
+        </div>
+        <button onclick="startSlideshow()">Start Activity</button>
+    </div>
+
+    <div id="slideshow-area">
+        <div id="photo-container">
+            <div id="photo-instruction"></div>
+            <img id="current-photo" src="">
+        </div>
+
+        <div id="modal-overlay">
+            <div id="answer-modal">
+                <h2 id="modal-title"></h2>
+                <p id="instructions">Listening...</p>
+                
+                <div id="transcript"></div>
+                <div id="transcript-buttons" style="display:none; margin-top: 20px;">
+                    <button onclick="acceptTranscript()" style="background: #28a745; margin-right: 10px;">✓ That's Correct</button>
+                    <button onclick="rejectTranscript()" style="background: #dc3545;">Try Again</button>
+                </div>
+                <div id="feedback"></div>
+                <div id="countdown"></div>
+            </div>
+        </div>
+
+        <div id="automation-popup">
+            <div class="label">Automation Answer:</div>
+            <div class="answer" id="automation-answer-value"></div>
+        </div>
+    </div>
+
+    <div id="done-screen">
+        <h2>Done!</h2>
+    </div>
+
+    <script>
+        let photos = [];
+        let duration = 2;
+        let feedbackCountdown = 3;
+        let recordingDuration = 5;
+        let automationPopupDelay = 1;
+        let index = 0;
+        let automation = false;
+        let mediaRecorder;
+        let chunks = [];
+        let allQuestions = {};
+        let countdownInterval;
+        let recordingTimeout;
+        let automationPopupTimeout;  // Added: for automation popup timing
+        let isRecording = false;
+        let sessionId = null;
+        let isCountingDown = false;  // Prevent multiple countdowns
+
+        // Get session ID on page load
+        fetch('/get-session-id')
+            .then(r => r.json())
+            .then(data => {
+                sessionId = data.session_id;
+                console.log('Session ID:', sessionId);
+            });
+
+        fetch('/slideshow-data')
+            .then(r => r.json())
+            .then(data => {
+                console.log('Slideshow data loaded:', data);
+                photos = data.photos;
+                duration = data.duration || 2;
+                automation = data.automation || false;
+                feedbackCountdown = data.feedbackCountdown || 3;
+                recordingDuration = data.recordingDuration || 5;
+                automationPopupDelay = data.automationPopupDelay || 1;
+                console.log('Variables set:', { duration, automation, feedbackCountdown, recordingDuration, automationPopupDelay });
+            })
+            .catch(err => {
+                console.error('Error loading slideshow data:', err);
+                automationPopupDelay = automationPopupDelay || 1;
+            });
+
+        let recognition;
+        let isListening = false;
+
+        // Initialize Web Speech API
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                console.log('Speech Recognition not supported');
+                return false;
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            return true;
+        }
+
+        function startSlideshow() {
+            document.getElementById('instructions-screen').style.display = 'none';
+            document.getElementById('slideshow-area').classList.add('active');
+            
+            // Request microphone permission once at startup
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        // Permission granted - stop the stream since we'll use Web Speech API
+                        stream.getTracks().forEach(track => track.stop());
+                        console.log('Microphone permission granted');
+                    })
+                    .catch(err => {
+                        console.log('Microphone permission denied or error:', err);
+                    });
+            }
+            
+            // Try fullscreen but don't fail if it's not available
+            try {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Fullscreen request failed:', err);
+                });
+            } catch (e) {
+                console.log('Fullscreen not supported:', e);
+            }
+            
+            index = 0;
+            loadQuestions().then(() => showPhoto());
+        }
+
+        async function startTestRecording() {
+            // This function is deprecated, use recordCount() instead
+        }
+
+        function passTestAndStart() {
+            // This function is deprecated, use startSlideshow() instead
+        }
+
+        async function loadQuestions() {
+            const response = await fetch('/get-questions');
+            allQuestions = await response.json();
+        }
+
+        function extractQuestionText(question) {
+            // Extract just the color and vehicle from "How many COLOR VEHICLE are there?"
+            const match = question.match(/How many (.+) are there\?/i);
+            return match ? match[1] : question;
+        }
+
+        function showPhoto() {
+            console.log('showPhoto() called, index:', index, 'total photos:', photos.length);
+            
+            if (index >= photos.length) {
+                endSlideshow();
+                return;
+            }
+
+            const photo = photos[index];
+            console.log('Displaying photo:', photo.src);
+            
+            document.getElementById('current-photo').src = '/static/' + photo.src;
+            document.getElementById('modal-overlay').classList.remove('show');
+            document.getElementById('automation-popup').classList.remove('show');
+            clearInterval(countdownInterval);
+            
+            // Clear any pending automation popup timeout
+            if (automationPopupTimeout) {
+                clearTimeout(automationPopupTimeout);
+                automationPopupTimeout = null;
+            }
+            
+            // Clear any pending recording timeout
+            if (recordingTimeout) {
+                clearTimeout(recordingTimeout);
+                recordingTimeout = null;
+            }
+            isRecording = false;
+
+            // Show instruction on photo using prompt from text.json
+            const filename = photo.src.split('/').pop();
+            const photoData = allQuestions[filename];
+            const promptText = photoData ? (photoData.prompt || photoData.question) : '';
+            console.log('Photo data:', filename, photoData);
+            document.getElementById('photo-instruction').innerText = promptText;
+
+            // Show automation popup at configured delay (if enabled)
+            // Skip automation for Baseline photos
+            const isBaseline = filename.toLowerCase().includes('baseline');
+            if (automation && photoData && photoData.automation_answer && !isBaseline) {
+                const delay = (automationPopupDelay || 1) * 1000;  // Default to 1 second if undefined
+                console.log('Setting automation popup timeout for', delay, 'ms');
+                automationPopupTimeout = setTimeout(() => {
+                    console.log('Showing automation popup');
+                    document.getElementById('automation-answer-value').innerText = photoData.automation_answer;
+                    document.getElementById('automation-popup').classList.add('show');
+                }, delay);
+            }
+
+            const modalDelay = (duration || 2) * 1000;  // Default to 2 seconds if undefined
+            console.log('Setting modal timeout for', modalDelay, 'ms');
+            setTimeout(() => {
+                console.log('Calling showModal for photo:', photo.src);
+                showModal(photo);
+            }, modalDelay);
+        }
+
+        function showModal(photo) {
+            console.log('showModal() called for photo:', photo.src);
+            
+            const questionText = extractQuestionText(photo.question);
+            document.getElementById('modal-title').innerText = 'How many ' + questionText.toLowerCase() + '?';
+            document.getElementById('instructions').innerText = 'Listening...';
+            document.getElementById('transcript').innerText = '';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('countdown').innerText = '';
+            chunks = [];
+
+            console.log('Adding show class to modal-overlay');
+            document.getElementById('modal-overlay').classList.add('show');
+            
+            console.log('Calling startRecording()');
+            // Auto-start recording
+            startRecording();
+        }
+
+        async function startRecording() {
+            // Hide automation popup when recording starts
+            if (automationPopupTimeout) {
+                clearTimeout(automationPopupTimeout);
+                automationPopupTimeout = null;
+            }
+            document.getElementById('automation-popup').classList.remove('show');
+            
+            // Prevent multiple simultaneous recordings
+            if (isRecording) {
+                return;
+            }
+            
+            isRecording = true;
+            chunks = [];
+            try {
+                // Recreate recognition object for each recording to avoid glitching
+                initSpeechRecognition();
+
+                let finalTranscript = '';
+                let interimTranscript = '';
+                let hasProcessed = false; // Prevent multiple calls to onend
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    hasProcessed = false;
+                    document.getElementById('transcript').innerText = '';
+                    document.getElementById('transcript-buttons').style.display = 'none';
+                    document.getElementById('instructions').innerText = '🎤 Listening...';
+                };
+
+                recognition.onresult = (event) => {
+                    interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript + ' ';
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    // Show live transcription on screen
+                    const display = finalTranscript + interimTranscript;
+                    document.getElementById('transcript').innerText = display;
+                };
+
+                recognition.onerror = (event) => {
+                    console.log('Recognition error:', event.error);
+                    // Don't advance on error, just log it
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    if (!hasProcessed) {
+                        hasProcessed = true;
+                        if (finalTranscript.trim()) {
+                            // Auto-validate the answer
+                            document.getElementById('transcript').innerText = '🎤 You: ' + finalTranscript.trim();
+                            // Auto-process the answer instead of waiting for button click
+                            setTimeout(() => {
+                                acceptTranscript();
+                            }, 500);
+                        } else {
+                            // No answer detected - auto-process as incomplete
+                            document.getElementById('transcript').innerText = '❌ No answer detected';
+                            document.getElementById('instructions').innerText = '';
+                            // Auto-advance after showing no answer message
+                            setTimeout(() => {
+                                acceptTranscript();
+                            }, 1500);
+                        }
+                    }
+                };
+
+                recognition.start();
+
+                // Auto-stop recording after configured duration
+                const recDuration = (recordingDuration || 5) * 1000;  // Default to 5 seconds if undefined
+                recordingTimeout = setTimeout(() => {
+                    if (isListening) {
+                        recognition.stop();
+                    }
+                }, recDuration);
+            } catch (error) {
+                console.error('Recording error:', error);
+                document.getElementById('transcript').innerText = 'Microphone access denied';
+                document.getElementById('transcript-buttons').style.display = 'block';
+                document.getElementById('instructions').innerText = 'Try again';
+            } finally {
+                isRecording = false;
+            }
+        }
+
+        function acceptTranscript() {
+            if (recordingTimeout) {
+                clearTimeout(recordingTimeout);
+                recordingTimeout = null;
+            }
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+            isRecording = false;
+            
+            const transcriptText = document.getElementById('transcript').innerText;
+            
+            // Check if it's a no-answer case
+            if (transcriptText.includes('No answer detected')) {
+                // Process as incomplete answer
+                const filename = photos[index].src.split('/').pop();
+                const correctAnswer = allQuestions[filename] ? allQuestions[filename].real_answer : null;
+                const question = allQuestions[filename] ? allQuestions[filename].question : 'Unknown';
+                
+                // Show feedback
+                document.getElementById('feedback').innerHTML = `<div class="feedback incorrect">✗ Incorrect. The answer is <strong>${correctAnswer}</strong></div>`;
+                
+                // Save as incomplete
+                if (sessionId) {
+                    fetch('/save-response', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            image_filename: filename,
+                            question: question,
+                            user_response: 'NO ANSWER',
+                            correct_answer: correctAnswer,
+                            is_correct: false
+                        })
+                    }).then(r => r.json())
+                      .then(data => {
+                          console.log('No-answer saved to session');
+                          document.getElementById('transcript-buttons').style.display = 'none';
+                          startCountdown();
+                      })
+                      .catch(err => {
+                          console.error('Error saving response:', err);
+                          document.getElementById('transcript-buttons').style.display = 'none';
+                          startCountdown();
+                      });
+                } else {
+                    document.getElementById('transcript-buttons').style.display = 'none';
+                    startCountdown();
+                }
+            } else {
+                // Normal transcript - extract and process
+                const userAnswer = transcriptText.replace('🎤 You: ', '').trim();
+                if (userAnswer) {
+                    document.getElementById('transcript-buttons').style.display = 'none';
+                    processUserAnswer(userAnswer);
+                } else {
+                    document.getElementById('instructions').innerText = 'Please try speaking again';
+                    setTimeout(() => {
+                        rejectTranscript();
+                    }, 1000);
+                }
+            }
+        }
+
+        function rejectTranscript() {
+            if (recordingTimeout) {
+                clearTimeout(recordingTimeout);
+                recordingTimeout = null;
+            }
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+            document.getElementById('transcript').innerText = '';
+            document.getElementById('transcript-buttons').style.display = 'none';
+            document.getElementById('instructions').innerText = 'Recording again...';
+            isRecording = false;
+            setTimeout(() => {
+                startRecording();
+            }, 500);
+        }
+
+        function extractFirstNumber(userAnswer) {
+            const numberWords = { 'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
+            const answer = userAnswer.toLowerCase().trim();
+            
+            // First, try to find word numbers with word boundaries
+            for (let word in numberWords) {
+                // Create a regex that matches the word with boundaries (not part of another word)
+                const regex = new RegExp(`\\b${word}\\b`);
+                if (regex.test(answer)) {
+                    return numberWords[word];
+                }
+            }
+            
+            // If no word number found, try to extract the first digit/number sequence
+            const digitMatch = answer.match(/\b(\d+)\b/);
+            if (digitMatch) {
+                return parseInt(digitMatch[1]);
+            }
+            
+            return null;
+        }
+
+        function processUserAnswer(userAnswer) {
+            const filename = photos[index].src.split('/').pop();
+            const correctAnswer = allQuestions[filename] ? allQuestions[filename].real_answer : null;
+            
+            if (!correctAnswer) {
+                document.getElementById('feedback').innerHTML = 'No answer key found';
+                startCountdown();
+                return;
+            }
+
+            const userNumber = extractFirstNumber(userAnswer);
+            const isCorrect = userNumber > 0 && userNumber === correctAnswer;
+            
+            // Create display answer with extracted number
+            let displayAnswer = userAnswer;
+            if (userNumber > 0) {
+                // Replace the extracted number in the original answer
+                displayAnswer = userAnswer.replace(/\b\d+\b|zero|one|two|three|four|five|six|seven|eight|nine|ten\b/i, userNumber);
+            }
+
+            let feedbackText = '';
+            if (isCorrect) {
+                feedbackText = `<div class="feedback correct">✓ Correct!</div>`;
+            } else if (userNumber > 0) {
+                feedbackText = `<div class="feedback incorrect">✗ Incorrect. The answer is <strong>${correctAnswer}</strong></div>`;
+            } else {
+                feedbackText = `<div class="feedback incorrect">✗ Incorrect. The answer is <strong>${correctAnswer}</strong></div>`;
+            }
+
+            if (automation) {
+                const isBaseline = filename.toLowerCase().includes('baseline');
+                const automationAnswer = allQuestions[filename] ? allQuestions[filename].automation_answer : null;
+                if (automationAnswer && !isBaseline) {
+                    feedbackText += `<div style="font-size: 0.9rem; color: #666; margin-top: 5px;">Automation answer: ${automationAnswer}</div>`;
+                }
+            }
+
+            document.getElementById('feedback').innerHTML = feedbackText;
+            
+            // Save response to session
+            if (sessionId) {
+                const question = allQuestions[filename] ? allQuestions[filename].question : 'Unknown';
+                fetch('/save-response', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_filename: filename,
+                        question: question,
+                        user_response: userAnswer,
+                        correct_answer: correctAnswer,
+                        is_correct: isCorrect
+                    })
+                }).then(r => r.json())
+                  .then(data => {
+                      console.log('Response saved:', data);
+                      startCountdown();
+                  })
+                  .catch(err => {
+                      console.error('Error saving response:', err);
+                      startCountdown();
+                  });
+            } else {
+                startCountdown();
+            }
+        }
+
+        function stopRecording() {
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+        }
+
+        function startCountdown() {
+            // Prevent multiple countdowns
+            if (isCountingDown) {
+                return;
+            }
+            isCountingDown = true;
+            
+            let count = feedbackCountdown || 3;  // Default to 3 seconds if undefined
+            document.getElementById('countdown').innerText = count;
+            
+            countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    document.getElementById('countdown').innerText = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    isCountingDown = false;
+                    nextPhoto();
+                }
+            }, 1000);
+        }
+
+        function nextPhoto() {
+            // Clear any pending timeouts/intervals
+            if (recordingTimeout) {
+                clearTimeout(recordingTimeout);
+                recordingTimeout = null;
+            }
+            if (automationPopupTimeout) {
+                clearTimeout(automationPopupTimeout);
+                automationPopupTimeout = null;
+            }
+            document.getElementById('automation-popup').classList.remove('show');
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+            clearInterval(countdownInterval);
+            isRecording = false;
+            
+            index++;
+            if (index >= photos.length) {
+                endSlideshow();
+            } else {
+                showPhoto();
+            }
+        }
+
+        function endSlideshow() {
+            // Navigate to the done page
+            window.location.href = '/done';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.fullscreenElement) document.exitFullscreen();
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+</html>
