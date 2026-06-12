@@ -129,7 +129,6 @@
             font-size: 1.5rem;
             text-align: center;
             z-index: 50;
-            border-radius: 8px;
         }
 
         #modal-overlay {
@@ -213,8 +212,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #d3d3d3;
-            border: 3px solid #808080;
+            background: #fff3cd;
+            border: 3px solid #ffc107;
             padding: 40px;
             font-size: 1.8rem;
             font-weight: bold;
@@ -243,28 +242,20 @@
 
         #automation-popup p {
             margin: 0;
-            color: #404040;
+            color: #856404;
         }
 
         #automation-popup .label {
             font-size: 0.8rem;
-            color: #404040;
+            color: #856404;
             margin-bottom: 10px;
             opacity: 0.8;
         }
 
         #automation-popup .answer {
             font-size: 2.2rem;
-            color: #606060;
+            color: #ffc107;
             margin-top: 10px;
-        }
-
-        #instructions-screen {
-            display: none;
-        }
-
-        #instructions-screen.active {
-            display: block;
         }
     </style>
 </head>
@@ -290,7 +281,7 @@
         <div id="test-step-2" style="display:none;">
             <div class="instruction-box">
                 <strong>Step 2: Format Test</strong><br>
-                Click below and say: "There are 5 red trucks"
+                Click below and say: "Count the number of red trucks"
             </div>
             <button id="record-format-btn" onclick="recordFormat()">🎤 Say Format</button>
             <div id="format-transcript" class="transcript-box" style="display:none;"></div>
@@ -305,16 +296,16 @@
         </div>
     </div>
 
-    <div id="instructions-screen" class="container">
+    <div id="instructions-screen" class="container" style="display:none;">
         <h1>Task Instructions</h1>
         <div class="instruction-box">
             <strong>Your Task:</strong><br><br>
             You will see photos of vehicles. For each photo, count the vehicles and respond by saying:<br><br>
-            <strong>"There are [NUMBER] [COLOR] [VEHICLE]"</strong><br><br>
+            <strong>"Count the number of [COLOR] [VEHICLE]"</strong><br><br>
             Examples:<br>
-            • "There are 4 blue cars"<br>
-            • "There are 5 red trucks"<br>
-            • "There are 3 green cars"
+            • "Count the number of blue cars"<br>
+            • "Count the number of red trucks"<br>
+            • "Count the number of green cars"
         </div>
         <div class="instruction-box">
             <strong>How it works:</strong><br><br>
@@ -322,10 +313,6 @@
             2. Say your answer in the format above<br>
             3. Your answer will be shown<br>
             4. Move to the next photo
-        </div>
-        <div class="instruction-box">
-            <strong>AI Assistance:</strong><br><br>
-            An AI will also try to count the objects and provide suggested answers; these suggestions are optional and shown to help you.
         </div>
         <button onclick="startSlideshow()">Start Activity</button>
     </div>
@@ -374,10 +361,9 @@
         let allQuestions = {};
         let countdownInterval;
         let recordingTimeout;
-        let automationPopupTimeout = null;
         let isRecording = false;
         let sessionId = null;
-        let isCountingDown = false;
+        let isCountingDown = false;  // Prevent multiple countdowns
 
         // Get session ID on page load
         fetch('/get-session-id')
@@ -390,145 +376,166 @@
         fetch('/slideshow-data')
             .then(r => r.json())
             .then(data => {
-                console.log('Slideshow data loaded:', data);
                 photos = data.photos;
-                duration = data.duration || 2;
-                automation = data.automation || false;
+                duration = data.duration;
+                automation = data.automation;
                 feedbackCountdown = data.feedbackCountdown || 3;
                 recordingDuration = data.recordingDuration || 5;
                 automationPopupDelay = data.automationPopupDelay || 1;
-                console.log('Variables set:', { duration, automation, feedbackCountdown, recordingDuration, automationPopupDelay });
-            })
-            .catch(err => {
-                console.error('Error loading slideshow data:', err);
             });
 
         let recognition;
         let isListening = false;
-        let mediaRecorder;
-        let audioContext;
-        let mediaStream;
-        let chunks = [];
-
-        async function initAudioRecording() {
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    chunks.push(event.data);
-                };
-                
-                return true;
-            } catch (error) {
-                console.error('Microphone access denied:', error);
-                return false;
-            }
-        }
-
-        async function captureAndTranscribe(duration, displayElement, context) {
-            if (!mediaRecorder) {
-                const success = await initAudioRecording();
-                if (!success) {
-                    displayElement.innerHTML = '<div style="color: red;">❌ Microphone access denied</div>';
-                    return null;
-                }
-            }
-
-            chunks = [];
-            let finalTranscript = '';
-            
-            if (displayElement) {
-                displayElement.innerHTML = '<div style="color: #666;">🎤 Recording... please speak</div>';
-            }
-
-            mediaRecorder.start();
-            
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    mediaRecorder.stop();
-                    
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-                        const formData = new FormData();
-                        formData.append('audio', audioBlob, 'audio.webm');
-                        
-                        if (displayElement) {
-                            displayElement.innerHTML = '<div style="color: #666;">🎤 Processing... please wait</div>';
-                        }
-                        
-                        try {
-                            const response = await fetch('/transcribe', {
-                                method: 'POST',
-                                body: formData
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (data.text) {
-                                finalTranscript = data.text;
-                                if (displayElement) {
-                                    displayElement.innerHTML = '<div>🎤 You: ' + finalTranscript + '</div>';
-                                }
-                                resolve(finalTranscript);
-                            } else if (data.error) {
-                                console.error('Transcription error:', data.error);
-                                if (displayElement) {
-                                    displayElement.innerHTML = '<div style="color: red;">❌ Transcription failed</div>';
-                                }
-                                resolve(null);
-                            }
-                        } catch (error) {
-                            console.error('Fetch error:', error);
-                            if (displayElement) {
-                                displayElement.innerHTML = '<div style="color: red;">❌ Error: ' + error.message + '</div>';
-                            }
-                            resolve(null);
-                        }
-                    };
-                }, (duration || 5) * 1000);
-            });
-        }
 
         function startMicTest() {
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('test-screen').style.display = 'block';
         }
 
+        // Initialize Web Speech API
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                console.log('Speech Recognition not supported');
+                return false;
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            return true;
+        }
+
         async function recordCount() {
+            if (!initSpeechRecognition()) {
+                alert('Speech Recognition not supported in this browser');
+                return;
+            }
+
             document.getElementById('record-count-btn').disabled = true;
             document.getElementById('count-transcript').style.display = 'block';
+            document.getElementById('count-transcript').innerHTML = '<div style="color: #666;">🎤 Listening... counting from 1 to 10</div>';
             document.getElementById('accept-count-btn').style.display = 'none';
             
-            const result = await captureAndTranscribe(10, document.getElementById('count-transcript'));
-            
-            if (result) {
-                document.getElementById('accept-count-btn').style.display = 'inline-block';
-            }
-            document.getElementById('record-count-btn').disabled = false;
+            let finalTranscript = '';
+
+            recognition.onstart = () => {
+                isListening = true;
+                console.log('Recording started');
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                // Show live transcription
+                const display = finalTranscript + interimTranscript;
+                document.getElementById('count-transcript').innerHTML = '<div>🎤 You: ' + (display || 'Listening...') + '</div>';
+            };
+
+            recognition.onerror = (event) => {
+                document.getElementById('count-transcript').innerHTML = '<div style="color: red;">❌ Error: ' + event.error + '</div>';
+                document.getElementById('record-count-btn').disabled = false;
+                isListening = false;
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                if (finalTranscript.trim()) {
+                    document.getElementById('count-transcript').innerHTML = '<div>You said: ' + finalTranscript.trim() + '</div>';
+                    document.getElementById('accept-count-btn').style.display = 'inline-block';
+                }
+            };
+
+            recognition.start();
+            setTimeout(() => {
+                if (isListening) {
+                    recognition.stop();
+                }
+            }, 15000);
         }
 
         function acceptCount() {
+            if (recognition && isListening) {
+                recognition.stop();
+            }
             document.getElementById('test-step-1').style.display = 'none';
             document.getElementById('test-step-2').style.display = 'block';
             document.getElementById('record-count-btn').disabled = false;
         }
 
         async function recordFormat() {
+            if (!initSpeechRecognition()) {
+                alert('Speech Recognition not supported in this browser');
+                return;
+            }
+
             document.getElementById('record-format-btn').disabled = true;
             document.getElementById('format-transcript').style.display = 'block';
+            document.getElementById('format-transcript').innerHTML = '<div style="color: #666;">🎤 Listening... say "Count the number of red trucks"</div>';
             document.getElementById('accept-format-btn').style.display = 'none';
             
-            const result = await captureAndTranscribe(8, document.getElementById('format-transcript'));
-            
-            if (result) {
-                document.getElementById('accept-format-btn').style.display = 'inline-block';
-            }
-            document.getElementById('record-format-btn').disabled = false;
+            let finalTranscript = '';
+
+            recognition.onstart = () => {
+                isListening = true;
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                // Show live transcription
+                const display = finalTranscript + interimTranscript;
+                document.getElementById('format-transcript').innerHTML = '<div>🎤 You: ' + (display || 'Listening...') + '</div>';
+            };
+
+            recognition.onerror = (event) => {
+                document.getElementById('format-transcript').innerHTML = '<div style="color: red;">❌ Error: ' + event.error + '</div>';
+                document.getElementById('record-format-btn').disabled = false;
+                isListening = false;
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                if (finalTranscript.trim()) {
+                    document.getElementById('format-transcript').innerHTML = '<div>You said: ' + finalTranscript.trim() + '</div>';
+                    
+                    // Check if response contains "there are" and a number
+                    const text = finalTranscript.toLowerCase();
+                    const hasThereAre = text.includes('there') && text.includes('are');
+                    const hasNumber = /\b(one|two|three|four|five|six|seven|eight|nine|ten|[0-9])\b/.test(text);
+                    
+                    if (hasThereAre && hasNumber) {
+                        document.getElementById('accept-format-btn').style.display = 'inline-block';
+                    }
+                }
+            };
+
+            recognition.start();
+            setTimeout(() => {
+                if (isListening) {
+                    recognition.stop();
+                }
+            }, 10000);
         }
 
         function acceptFormat() {
+            if (recognition && isListening) {
+                recognition.stop();
+            }
             document.getElementById('test-step-2').style.display = 'none';
             document.getElementById('test-complete').style.display = 'block';
             document.getElementById('record-format-btn').disabled = false;
@@ -536,23 +543,23 @@
 
         function startInstructions() {
             document.getElementById('test-screen').style.display = 'none';
-            document.getElementById('instructions-screen').classList.add('active');
+            document.getElementById('instructions-screen').style.display = 'block';
         }
 
         function startSlideshow() {
-            document.getElementById('instructions-screen').classList.remove('active');
+            document.getElementById('instructions-screen').style.display = 'none';
             document.getElementById('slideshow-area').classList.add('active');
-            
-            try {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Fullscreen request failed:', err);
-                });
-            } catch (e) {
-                console.log('Fullscreen not supported:', e);
-            }
-            
+            document.documentElement.requestFullscreen();
             index = 0;
             loadQuestions().then(() => showPhoto());
+        }
+
+        async function startTestRecording() {
+            // This function is deprecated, use recordCount() instead
+        }
+
+        function passTestAndStart() {
+            // This function is deprecated, use startSlideshow() instead
         }
 
         async function loadQuestions() {
@@ -561,65 +568,56 @@
         }
 
         function extractQuestionText(question) {
+            // Extract just the color and vehicle from "How many COLOR VEHICLE are there?"
             const match = question.match(/How many (.+) are there\?/i);
             return match ? match[1] : question;
         }
 
         function showPhoto() {
-            console.log('showPhoto() called, index:', index, 'total photos:', photos.length);
-            
             if (index >= photos.length) {
                 endSlideshow();
                 return;
             }
 
             const photo = photos[index];
-            console.log('Displaying photo:', photo.src);
-            
             document.getElementById('current-photo').src = '/static/' + photo.src;
             document.getElementById('modal-overlay').classList.remove('show');
             document.getElementById('automation-popup').classList.remove('show');
             clearInterval(countdownInterval);
             
+            // Clear any pending automation popup timeout
             if (automationPopupTimeout) {
                 clearTimeout(automationPopupTimeout);
                 automationPopupTimeout = null;
             }
             
+            // Clear any pending recording timeout
             if (recordingTimeout) {
                 clearTimeout(recordingTimeout);
                 recordingTimeout = null;
             }
             isRecording = false;
 
+            // Show instruction on photo using prompt from text.json
             const filename = photo.src.split('/').pop();
             const photoData = allQuestions[filename];
             const promptText = photoData ? (photoData.prompt || photoData.question) : '';
-            console.log('Photo data:', filename, photoData);
             document.getElementById('photo-instruction').innerText = promptText;
 
-            const isBaseline = filename.toLowerCase().includes('baseline');
-            if (automation && photoData && photoData.automation_answer && !isBaseline) {
-                const delay = (automationPopupDelay || 1) * 1000;
-                console.log('Setting automation popup timeout for', delay, 'ms');
+            // Show automation popup at configured delay (if enabled)
+            if (automation && photoData && photoData.automation_answer) {
                 automationPopupTimeout = setTimeout(() => {
-                    console.log('Showing automation popup');
                     document.getElementById('automation-answer-value').innerText = photoData.automation_answer;
                     document.getElementById('automation-popup').classList.add('show');
-                }, delay);
+                }, automationPopupDelay * 1000);
             }
 
-            const modalDelay = (duration || 2) * 1000;
-            console.log('Setting modal timeout for', modalDelay, 'ms');
             setTimeout(() => {
-                console.log('Calling showModal for photo:', photo.src);
                 showModal(photo);
-            }, modalDelay);
+            }, duration * 1000);
         }
 
         function showModal(photo) {
-            console.log('showModal() called for photo:', photo.src);
-            
             const questionText = extractQuestionText(photo.question);
             document.getElementById('modal-title').innerText = 'How many ' + questionText.toLowerCase() + '?';
             document.getElementById('instructions').innerText = 'Listening...';
@@ -628,43 +626,89 @@
             document.getElementById('countdown').innerText = '';
             chunks = [];
 
-            console.log('Adding show class to modal-overlay');
             document.getElementById('modal-overlay').classList.add('show');
             
-            console.log('Calling startRecording()');
+            // Auto-start recording
             startRecording();
         }
 
         async function startRecording() {
+            // Hide automation popup when recording starts
             if (automationPopupTimeout) {
                 clearTimeout(automationPopupTimeout);
                 automationPopupTimeout = null;
             }
             document.getElementById('automation-popup').classList.remove('show');
             
+            // Prevent multiple simultaneous recordings
             if (isRecording) {
                 return;
             }
             
             isRecording = true;
-            
+            chunks = [];
             try {
-                document.getElementById('instructions').innerText = '🎤 Recording... Speak your answer';
-                
-                const finalTranscript = await captureAndTranscribe(recordingDuration || 5, document.getElementById('transcript'));
-                
-                if (finalTranscript && finalTranscript.trim()) {
-                    document.getElementById('transcript').innerText = '🎤 You: ' + finalTranscript.trim();
-                    setTimeout(() => {
-                        acceptTranscript();
-                    }, 500);
-                } else {
-                    document.getElementById('transcript').innerText = '❌ No answer detected';
-                    document.getElementById('instructions').innerText = '';
-                    setTimeout(() => {
-                        acceptTranscript();
-                    }, 1500);
-                }
+                // Recreate recognition object for each recording to avoid glitching
+                initSpeechRecognition();
+
+                let finalTranscript = '';
+                let interimTranscript = '';
+                let hasProcessed = false; // Prevent multiple calls to onend
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    hasProcessed = false;
+                    document.getElementById('transcript').innerText = '';
+                    document.getElementById('transcript-buttons').style.display = 'none';
+                    document.getElementById('instructions').innerText = '🎤 Listening...';
+                };
+
+                recognition.onresult = (event) => {
+                    interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript + ' ';
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    // Show live transcription on screen
+                    const display = finalTranscript + interimTranscript;
+                    document.getElementById('transcript').innerText = display;
+                };
+
+                recognition.onerror = (event) => {
+                    console.log('Recognition error:', event.error);
+                    // Don't advance on error, just log it
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    if (!hasProcessed) {
+                        hasProcessed = true;
+                        if (finalTranscript.trim()) {
+                            // Show the transcript and buttons to confirm or retry
+                            document.getElementById('transcript').innerText = '🎤 You: ' + finalTranscript.trim();
+                            document.getElementById('transcript-buttons').style.display = 'block';
+                            document.getElementById('instructions').innerText = 'Is this correct?';
+                        } else {
+                            // No answer detected - treat as incomplete answer
+                            document.getElementById('transcript').innerText = '❌ No answer detected';
+                            document.getElementById('transcript-buttons').style.display = 'block';
+                            document.getElementById('instructions').innerText = 'Try speaking again';
+                        }
+                    }
+                };
+
+                recognition.start();
+
+                // Auto-stop recording after configured duration
+                recordingTimeout = setTimeout(() => {
+                    if (isListening) {
+                        recognition.stop();
+                    }
+                }, recordingDuration * 1000);
             } catch (error) {
                 console.error('Recording error:', error);
                 document.getElementById('transcript').innerText = 'Microphone access denied';
@@ -687,33 +731,54 @@
             
             const transcriptText = document.getElementById('transcript').innerText;
             
-            if (transcriptText.includes('No answer detected') || !transcriptText.trim()) {
-                document.getElementById('instructions').innerText = '❌ No answer detected. Please try again.';
-                document.getElementById('transcript-buttons').style.display = 'none';
-                setTimeout(() => {
-                    rejectTranscript();
-                }, 1500);
+            // Check if it's a no-answer case
+            if (transcriptText.includes('No answer detected')) {
+                // Process as incomplete answer
+                const filename = photos[index].src.split('/').pop();
+                const correctAnswer = allQuestions[filename] ? allQuestions[filename].real_answer : null;
+                const question = allQuestions[filename] ? allQuestions[filename].question : 'Unknown';
+                
+                // Show feedback
+                document.getElementById('feedback').innerHTML = `<div class="feedback incorrect">❌ No answer detected<br>The correct answer is <strong>${correctAnswer}</strong></div>`;
+                
+                // Save as incomplete
+                if (sessionId) {
+                    fetch('/save-response', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            image_filename: filename,
+                            question: question,
+                            user_response: 'NO ANSWER',
+                            correct_answer: correctAnswer,
+                            is_correct: false
+                        })
+                    }).then(r => r.json())
+                      .then(data => {
+                          console.log('No-answer saved to session');
+                          document.getElementById('transcript-buttons').style.display = 'none';
+                          startCountdown();
+                      })
+                      .catch(err => {
+                          console.error('Error saving response:', err);
+                          document.getElementById('transcript-buttons').style.display = 'none';
+                          startCountdown();
+                      });
+                } else {
+                    document.getElementById('transcript-buttons').style.display = 'none';
+                    startCountdown();
+                }
             } else {
+                // Normal transcript - extract and process
                 const userAnswer = transcriptText.replace('🎤 You: ', '').trim();
                 if (userAnswer) {
-                    // Check if a number was detected in the answer
-                    const userNumber = extractFirstNumber(userAnswer);
-                    if (userNumber === null) {
-                        document.getElementById('instructions').innerText = '⚠️ I didn\'t hear a number. Please say the count again.';
-                        document.getElementById('transcript-buttons').style.display = 'none';
-                        setTimeout(() => {
-                            rejectTranscript();
-                        }, 1500);
-                    } else {
-                        document.getElementById('transcript-buttons').style.display = 'none';
-                        processUserAnswer(userAnswer);
-                    }
-                } else {
-                    document.getElementById('instructions').innerText = '❌ No answer detected. Please try again.';
                     document.getElementById('transcript-buttons').style.display = 'none';
+                    processUserAnswer(userAnswer);
+                } else {
+                    document.getElementById('instructions').innerText = 'Please try speaking again';
                     setTimeout(() => {
                         rejectTranscript();
-                    }, 1500);
+                    }, 1000);
                 }
             }
         }
@@ -723,8 +788,8 @@
                 clearTimeout(recordingTimeout);
                 recordingTimeout = null;
             }
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
+            if (recognition && isListening) {
+                recognition.stop();
             }
             document.getElementById('transcript').innerText = '';
             document.getElementById('transcript-buttons').style.display = 'none';
@@ -739,13 +804,16 @@
             const numberWords = { 'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
             const answer = userAnswer.toLowerCase().trim();
             
+            // First, try to find word numbers with word boundaries
             for (let word in numberWords) {
+                // Create a regex that matches the word with boundaries (not part of another word)
                 const regex = new RegExp(`\\b${word}\\b`);
                 if (regex.test(answer)) {
                     return numberWords[word];
                 }
             }
             
+            // If no word number found, try to extract the first digit/number sequence
             const digitMatch = answer.match(/\b(\d+)\b/);
             if (digitMatch) {
                 return parseInt(digitMatch[1]);
@@ -765,36 +833,27 @@
             }
 
             const userNumber = extractFirstNumber(userAnswer);
-            
-            // If no number was detected, ask user to repeat
-            if (userNumber === null) {
-                document.getElementById('feedback').innerHTML = '';
-                document.getElementById('instructions').innerText = '⚠️ I didn\'t catch a number. Please try again.';
-                setTimeout(() => {
-                    rejectTranscript();
-                }, 1500);
-                return;
-            }
-            
-            const isCorrect = userNumber === correctAnswer;
+            const isCorrect = userNumber > 0 && userNumber === correctAnswer;
 
             let feedbackText = '';
             if (isCorrect) {
-                feedbackText = `<div class="feedback correct">✓ Correct!</div>`;
+                feedbackText = `<div class="feedback correct">✓ Correct! You said: "${userAnswer}"</div>`;
+            } else if (userNumber > 0) {
+                feedbackText = `<div class="feedback incorrect">You said: "${userAnswer}"<br>✗ The correct answer is <strong>${correctAnswer}</strong></div>`;
             } else {
-                feedbackText = `<div class="feedback incorrect">✗ Incorrect. The answer is <strong>${correctAnswer}</strong></div>`;
+                feedbackText = `<div class="feedback incorrect">Could not understand what you said.<br>✓ The correct answer is <strong>${correctAnswer}</strong></div>`;
             }
 
             if (automation) {
-                const isBaseline = filename.toLowerCase().includes('baseline');
                 const automationAnswer = allQuestions[filename] ? allQuestions[filename].automation_answer : null;
-                if (automationAnswer && !isBaseline) {
+                if (automationAnswer) {
                     feedbackText += `<div style="font-size: 0.9rem; color: #666; margin-top: 5px;">Automation answer: ${automationAnswer}</div>`;
                 }
             }
 
             document.getElementById('feedback').innerHTML = feedbackText;
             
+            // Save response to session
             if (sessionId) {
                 const question = allQuestions[filename] ? allQuestions[filename].question : 'Unknown';
                 fetch('/save-response', {
@@ -828,12 +887,13 @@
         }
 
         function startCountdown() {
+            // Prevent multiple countdowns
             if (isCountingDown) {
                 return;
             }
             isCountingDown = true;
             
-            let count = feedbackCountdown || 3;
+            let count = feedbackCountdown;
             document.getElementById('countdown').innerText = count;
             
             countdownInterval = setInterval(() => {
@@ -849,6 +909,7 @@
         }
 
         function nextPhoto() {
+            // Clear any pending timeouts/intervals
             if (recordingTimeout) {
                 clearTimeout(recordingTimeout);
                 recordingTimeout = null;
@@ -858,8 +919,8 @@
                 automationPopupTimeout = null;
             }
             document.getElementById('automation-popup').classList.remove('show');
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
+            if (recognition && isListening) {
+                recognition.stop();
             }
             clearInterval(countdownInterval);
             isRecording = false;
@@ -873,7 +934,17 @@
         }
 
         function endSlideshow() {
-            window.location.href = '/done';
+            document.getElementById('slideshow-area').style.display = 'none';
+            document.getElementById('done-screen').style.display = 'block';
+            if (document.fullscreenElement) document.exitFullscreen();
+            
+            // Shutdown the server
+            fetch('/shutdown', { method: 'POST' }).then(() => {
+                // Give it a moment to shut down, then close the window
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
+            }).catch(err => console.log('Server shutdown initiated'));
         }
 
         document.addEventListener('keydown', function(e) {

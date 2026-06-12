@@ -98,10 +98,6 @@ def index():
     session['automation_popup_delay'] = automation_popup_delay
     session.permanent = True
 
-    return render_template('training.html')
-
-@app.route('/slideshow')
-def slideshow():
     return render_template('slideshow.html')
 
 @app.route('/slideshow-data')

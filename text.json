@@ -1,0 +1,97 @@
+{
+ "BlueCar_Baseline.png" : {
+    "question": "How many BLUE CARS are there?",
+    "prompt": "Count the number of blue cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "BlueCar_Baseline2.png":{ 
+    "question": "How many BLUE CARS are there?",
+    "prompt": "Count the number of blue cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "OrangeSemi_Baseline.png" :{
+    "question": "How many ORANGE SEMI-TRUCKS are there?",
+    "prompt": "Count the number of orange semi-trucks",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "PinkBus_Baseline.png": { 
+   "question": "How many PINK BUSSES are there?",
+   "prompt": "Count the number of pink busses",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "PurpleCar_Baseline.png": {
+    "question": "How many PURPLE CARS are there?",
+    "prompt": "Count the number of purple cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "RedCar_Baseline.png": {
+    "question": "How many RED CARS are there?",
+    "prompt": "Count the number of red cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "RedCar_Baseline2.png": {
+    "question": "How many RED CARS are there?",
+    "prompt": "Count the number of red cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "RedTruck_Baseline.png": {
+    "question": "How many RED TRUCK are there?",
+    "prompt": "Count the number of red trucks",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "YellowCar_Baseline.png": {
+    "question": "How many YELLOW CARS are there?",
+    "prompt": "Count the number of yellow cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "YellowCar_Baseline2.png": {
+    "question": "How many YELLOW CARS are there?",
+    "prompt": "Count the number of yellow cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "YellowTruck_Baseline.png": {
+    "question": "How many YELLOW TRUCKS are there?",
+    "prompt": "Count the number of yellow trucks",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "BlueCar_Reliable.png": {
+    "question": "How many BLUE CARS are there?",
+    "prompt": "Count the number of blue cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "GreenCar_Reliable.png": {
+    "question": "How many GREEN CARS are there?",
+    "prompt": "Count the number of green cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "RedCar_Reliable.png": {
+    "question": "How many RED CARS are there?",
+    "prompt": "Count the number of red cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "RedTruck_Reliable.png": {
+    "question": "How many RED TRUCKS are there?",
+    "prompt": "Count the number of red trucks",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "YellowCar_Reliable.png": {
+    "question": "How many YELLOW CARS are there?",
+    "prompt": "Count the number of yellow cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "BlueCar_Unreliable.png": {
+    "question": "How many BLUE CARS are there?",
+    "prompt": "Count the number of blue cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "YellowCar_Unreliable.png": {
+    "question": "How many YELLOW CARS are there?",
+    "prompt": "Count the number of yellow cars",
+    "automation_answer": 4,
+    "real_answer": 4 },
+ "YellowCar_Unreliable2.png":{ 
+    "question": "How many Yellow CARS are there?",
+    "prompt": "Count the number of yellow cars",
+    "automation_answer": 4,
+    "real_answer": 4 }
+}
