@@ -24,6 +24,21 @@
         p {
             font-size: 1.5rem;
             margin: 20px 0;
+            color: #555;
+        }
+        .prompt-box {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            display: inline-block;
+            font-weight: bold;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
         }
     </style>
 </head>
@@ -31,6 +46,48 @@
     <div class="container">
         <h1>✓ Done!</h1>
         <p>Thank you for completing the task.</p>
+        <div class="prompt-box">Press SPACE to continue</div>
     </div>
+
+    <script>
+        // Listen for the spacebar press globally on the page
+        document.addEventListener('keydown', function(event) {
+            if (event.key === ' ' || event.code === 'Space') {
+                // Prevent the default browser behavior (like scrolling down)
+                event.preventDefault(); 
+                
+                handleAdvance();
+            }
+        });
+
+        function handleAdvance() {
+            console.log("Spacebar pressed. Activating iMotions trigger...");
+
+            // iMotions Web API endpoint configuration
+            const imotionsApiUrl = 'http://localhost:8089/imotions/api/v1/next'; 
+
+            fetch(imotionsApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "command": "next_stimulus" }) 
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Successfully advanced to next stimuli.');
+                    // Optional: Provide visual feedback that the press worked
+                    document.querySelector('.prompt-box').innerText = "Advancing...";
+                } else {
+                    console.warn('iMotions returned an error status:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error connecting to iMotions:', error);
+                // Fallback indicator so you know the keypress registered even if iMotions is closed
+                document.querySelector('.prompt-box').innerText = "Key registered (iMotions Offline)";
+            });
+        }
+    </script>
 </body>
 </html>
