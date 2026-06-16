@@ -369,8 +369,6 @@
         let automationPopupDelay = 1;
         let index = 0;
         let automation = false;
-        let mediaRecorder;
-        let chunks = [];
         let allQuestions = {};
         let countdownInterval;
         let recordingTimeout;
@@ -378,6 +376,7 @@
         let isRecording = false;
         let sessionId = null;
         let isCountingDown = false;
+        let activeRecognition = null;
 
         // Get session ID on page load
         fetch('/get-session-id')
@@ -403,89 +402,90 @@
                 console.error('Error loading slideshow data:', err);
             });
 
-        let recognition;
-        let isListening = false;
-        let audioContext;
-        let mediaStream;
-
-        async function initAudioRecording() {
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    chunks.push(event.data);
-                };
-                
-                return true;
-            } catch (error) {
-                console.error('Microphone access denied:', error);
-                return false;
-            }
-        }
-
-        async function captureAndTranscribe(duration, displayElement, context) {
-            if (!mediaRecorder) {
-                const success = await initAudioRecording();
-                if (!success) {
-                    displayElement.innerHTML = '<div style="color: red;">❌ Microphone access denied</div>';
-                    return null;
-                }
-            }
-
-            chunks = [];
-            let finalTranscript = '';
-            
-            if (displayElement) {
-                displayElement.innerHTML = '<div style="color: #666;">🎤 Recording... please speak</div>';
-            }
-
-            mediaRecorder.start();
-            
+        // ---------------------------------------------------------------
+        // Instant, local, in-browser transcription via Web Speech API.
+        // No audio upload, no server round-trip, no model inference wait.
+        // Works in Chrome/Edge (Chromium) via webkitSpeechRecognition.
+        // ---------------------------------------------------------------
+        function captureAndTranscribe(maxDuration, displayElement) {
             return new Promise((resolve) => {
-                setTimeout(() => {
-                    mediaRecorder.stop();
-                    
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-                        const formData = new FormData();
-                        formData.append('audio', audioBlob, 'audio.webm');
-                        
-                        if (displayElement) {
-                            displayElement.innerHTML = '<div style="color: #666;">🎤 Processing... please wait</div>';
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                if (!SpeechRecognition) {
+                    if (displayElement) {
+                        displayElement.innerHTML = '<div style="color: red;">❌ Speech recognition not supported in this browser</div>';
+                    }
+                    resolve(null);
+                    return;
+                }
+
+                const recognition = new SpeechRecognition();
+                activeRecognition = recognition;
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                let finalTranscript = '';
+                let settled = false;
+                let maxTimer = null;
+
+                if (displayElement) {
+                    displayElement.innerHTML = '<div style="color: #666;">🎤 Recording... please speak</div>';
+                }
+
+                function finish(result) {
+                    if (settled) return;
+                    settled = true;
+                    if (maxTimer) clearTimeout(maxTimer);
+                    activeRecognition = null;
+                    try { recognition.stop(); } catch (e) {}
+                    resolve(result);
+                }
+
+                recognition.onresult = (event) => {
+                    let interim = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interim += event.results[i][0].transcript;
                         }
-                        
-                        try {
-                            const response = await fetch('/transcribe', {
-                                method: 'POST',
-                                body: formData
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (data.text) {
-                                finalTranscript = data.text;
-                                if (displayElement) {
-                                    displayElement.innerHTML = '<div>🎤 You: ' + finalTranscript + '</div>';
-                                }
-                                resolve(finalTranscript);
-                            } else if (data.error) {
-                                console.error('Transcription error:', data.error);
-                                if (displayElement) {
-                                    displayElement.innerHTML = '<div style="color: red;">❌ Transcription failed</div>';
-                                }
-                                resolve(null);
-                            }
-                        } catch (error) {
-                            console.error('Fetch error:', error);
-                            if (displayElement) {
-                                displayElement.innerHTML = '<div style="color: red;">❌ Error: ' + error.message + '</div>';
-                            }
-                            resolve(null);
-                        }
-                    };
-                }, (duration || 5) * 1000);
+                    }
+                    if (displayElement) {
+                        displayElement.innerHTML = '<div>🎤 You: ' + (finalTranscript + interim) + '</div>';
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    if (event.error === 'no-speech' || event.error === 'aborted') {
+                        finish(finalTranscript.trim() || null);
+                        return;
+                    }
+                    if (displayElement && !finalTranscript.trim()) {
+                        displayElement.innerHTML = '<div style="color: red;">❌ ' + event.error + '</div>';
+                    }
+                    finish(finalTranscript.trim() || null);
+                };
+
+                recognition.onend = () => {
+                    finish(finalTranscript.trim() || null);
+                };
+
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.error('Failed to start recognition:', e);
+                    if (displayElement) {
+                        displayElement.innerHTML = '<div style="color: red;">❌ Microphone error</div>';
+                    }
+                    resolve(null);
+                    return;
+                }
+
+                maxTimer = setTimeout(() => {
+                    try { recognition.stop(); } catch (e) {}
+                }, (maxDuration || 5) * 1000);
             });
         }
 
@@ -624,7 +624,6 @@
             document.getElementById('transcript').innerText = '';
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('countdown').innerText = '';
-            chunks = [];
 
             console.log('Adding show class to modal-overlay');
             document.getElementById('modal-overlay').classList.add('show');
@@ -678,8 +677,8 @@
                 clearTimeout(recordingTimeout);
                 recordingTimeout = null;
             }
-            if (recognition && isListening) {
-                recognition.stop();
+            if (activeRecognition) {
+                try { activeRecognition.stop(); } catch (e) {}
             }
             isRecording = false;
             
@@ -721,8 +720,8 @@
                 clearTimeout(recordingTimeout);
                 recordingTimeout = null;
             }
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
+            if (activeRecognition) {
+                try { activeRecognition.stop(); } catch (e) {}
             }
             document.getElementById('transcript').innerText = '';
             document.getElementById('transcript-buttons').style.display = 'none';
@@ -820,8 +819,8 @@
         }
 
         function stopRecording() {
-            if (recognition && isListening) {
-                recognition.stop();
+            if (activeRecognition) {
+                try { activeRecognition.stop(); } catch (e) {}
             }
         }
 
@@ -856,8 +855,8 @@
                 automationPopupTimeout = null;
             }
             document.getElementById('automation-popup').classList.remove('show');
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
+            if (activeRecognition) {
+                try { activeRecognition.stop(); } catch (e) {}
             }
             clearInterval(countdownInterval);
             isRecording = false;

@@ -7,7 +7,6 @@ import webbrowser
 from threading import Timer
 from datetime import datetime
 import uuid
-from faster_whisper import WhisperModel
 from werkzeug.utils import secure_filename
 
 # Get the base directory of the app
@@ -38,20 +37,11 @@ AUTOMATION_ENABLED = config.getboolean('settings', 'automation', fallback=False)
 RECORDING_DURATION = config.getint('settings', 'recording_duration', fallback=5)
 FEEDBACK_COUNTDOWN = config.getint('settings', 'feedback_countdown', fallback=3)
 AUTOMATION_POPUP_DELAY = config.getint('settings', 'automation_popup_delay', fallback=1)
-WHISPER_MODEL = config.get('settings', 'whisper_model', fallback='base')
-WHISPER_DEVICE = config.get('settings', 'whisper_device', fallback='cpu')
 
 # Create uploads and sessions folders if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 SESSION_FOLDER = 'sessions'
 os.makedirs(SESSION_FOLDER, exist_ok=True)
-
-# Load Whisper model
-try:
-    whisper_model = WhisperModel(WHISPER_MODEL, device=WHISPER_DEVICE, compute_type="int8")
-except Exception as e:
-    print(f"Warning: Could not load Whisper model: {e}")
-    whisper_model = None
 
 # Load image sets from config
 SETS = {}
@@ -116,32 +106,6 @@ def get_questions():
     with open(QUESTIONS_FILE) as f:
         questions = json.load(f)
     return jsonify(questions)
-
-@app.route('/transcribe', methods=['POST'])
-def transcribe():
-    if not whisper_model:
-        return {'error': 'Whisper model not available'}, 500
-    
-    if 'audio' not in request.files:
-        return {'error': 'No audio file'}, 400
-    
-    file = request.files['audio']
-    if file.filename == '':
-        return {'error': 'No file selected'}, 400
-    
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
-    
-    try:
-        segments, info = whisper_model.transcribe(filepath)
-        text = "".join([segment.text for segment in segments])
-        return {'text': text, 'language': info.language}
-    except Exception as e:
-        return {'error': str(e)}, 500
-    finally:
-        if os.path.exists(filepath):
-            os.remove(filepath)
 
 @app.route('/get-session-id', methods=['GET'])
 def get_session_id():
@@ -226,6 +190,31 @@ def shutdown():
     
     return {'status': 'shutting down'}, 200
 
+def open_in_chrome(url):
+    """Try to launch the app in Chrome specifically, falling back to default browser."""
+    chrome_paths = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",  # macOS
+        "/usr/bin/google-chrome",  # Linux
+        "/usr/bin/google-chrome-stable",
+    ]
+
+    for path in chrome_paths:
+        if path and os.path.exists(path):
+            try:
+                webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(path))
+                webbrowser.get('chrome').open(url)
+                print(f"[BROWSER] Opened in Chrome: {path}")
+                return
+            except Exception as e:
+                print(f"[BROWSER ERROR] Failed to open Chrome at {path}: {e}")
+
+    # Fallback: system default browser (may not be Chrome)
+    print("[BROWSER] Chrome not found in known locations, falling back to default browser")
+    webbrowser.open(url)
+
 if __name__ == '__main__':
     import os
     
@@ -236,9 +225,9 @@ if __name__ == '__main__':
     
     # Only open browser in local development
     if environment == 'development' and host in ('127.0.0.1', 'localhost'):
-        def open_browser():
-            webbrowser.open(f'http://localhost:{port}')
-        Timer(1.5, open_browser).start()
+        def launch():
+            open_in_chrome(f'http://localhost:{port}')
+        Timer(1.5, launch).start()
     
     # Use waitress for development, gunicorn for production
     if environment == 'development':
