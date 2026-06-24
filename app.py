@@ -29,7 +29,7 @@ TRUSTWORTHY_FOLDER = config.get('paths', 'trustworthy_folder', fallback='static/
 UNTRUSTWORTHY_FOLDER = config.get('paths', 'untrustworthy_folder', fallback='static/images/untrustworthy')
 BASELINE_FOLDER = config.get('paths', 'baseline_folder', fallback='static/images/baseline')
 QUESTIONS_FILE = config.get('paths', 'questions_file', fallback='text.json')
-UPLOAD_FOLDER = config.get('paths', 'upload_folder', fallback='uploads')
+SESSION_FOLDER = 'sessions'
 
 DEFAULT_DURATION = config.getint('settings', 'duration', fallback=2)
 DEFAULT_SET = config.get('settings', 'default_set', fallback='set1')
@@ -38,9 +38,7 @@ RECORDING_DURATION = config.getint('settings', 'recording_duration', fallback=5)
 FEEDBACK_COUNTDOWN = config.getint('settings', 'feedback_countdown', fallback=3)
 AUTOMATION_POPUP_DELAY = config.getint('settings', 'automation_popup_delay', fallback=1)
 
-# Create uploads and sessions folders if they don't exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-SESSION_FOLDER = 'sessions'
+# Ensure the sessions directory exists
 os.makedirs(SESSION_FOLDER, exist_ok=True)
 
 # Load image sets from config
@@ -62,7 +60,6 @@ def add_cache_headers(response):
 
 @app.route('/')
 def index():
-    # Load configuration on startup
     duration = DEFAULT_DURATION
     selected_set = DEFAULT_SET
     automation = AUTOMATION_ENABLED
@@ -109,14 +106,11 @@ def get_questions():
 
 @app.route('/get-session-id', methods=['GET'])
 def get_session_id():
-    """Get or create a session ID for tracking user responses"""
     session.permanent = True
     if 'session_id' not in session:
-        # Create new session ID with timestamp
         session_id = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{str(uuid.uuid4())[:8]}"
         session['session_id'] = session_id
         
-        # Create session file
         session_file = os.path.join(SESSION_FOLDER, f"{session_id}.json")
         session_data = {
             'session_id': session_id,
@@ -127,7 +121,6 @@ def get_session_id():
             with open(session_file, 'w') as f:
                 json.dump(session_data, f, indent=2)
             print(f"[SESSION] Created session: {session_id}")
-            print(f"[SESSION] File saved to: {session_file}")
         except Exception as e:
             print(f"[SESSION ERROR] Failed to create session file: {e}")
     
@@ -135,7 +128,6 @@ def get_session_id():
 
 @app.route('/save-response', methods=['POST'])
 def save_response():
-    """Save user's response to the session file"""
     session.permanent = True
     if 'session_id' not in session:
         print("[SESSION ERROR] No active session")
@@ -146,22 +138,19 @@ def save_response():
     session_file = os.path.join(SESSION_FOLDER, f"{session_id}.json")
     
     try:
-        # Read existing session data
         with open(session_file, 'r') as f:
             session_data = json.load(f)
         
-        # Add response
         response_entry = {
             'timestamp': datetime.now().isoformat(),
             'image_filename': data.get('image_filename'),
             'question': data.get('question'),
-            'user_response': data.get('user_response'),
+            'user_response': data.get('user_response'), # Received directly as text from the browser!
             'correct_answer': data.get('correct_answer'),
             'is_correct': data.get('is_correct')
         }
         session_data['responses'].append(response_entry)
         
-        # Write back to file
         with open(session_file, 'w') as f:
             json.dump(session_data, f, indent=2)
         
@@ -173,16 +162,13 @@ def save_response():
 
 @app.route('/done')
 def done_page():
-    """Display the done page"""
     return render_template('done.html')
 
 @app.route('/shutdown', methods=['POST'])
 def shutdown():
-    """Shutdown the server gracefully"""
     def shutdown_server():
         os.kill(os.getpid(), signal.SIGTERM)
     
-    # Schedule shutdown in a separate thread to allow response to send
     from threading import Thread
     thread = Thread(target=shutdown_server)
     thread.daemon = True
@@ -218,22 +204,18 @@ def open_in_chrome(url):
 if __name__ == '__main__':
     import os
     
-    # Get port from environment variable (for Render, Heroku, etc.) or default to 8000
     port = int(os.environ.get('PORT', 8000))
     host = os.environ.get('HOST', '127.0.0.1')
     environment = os.environ.get('ENVIRONMENT', 'development')
     
-    # Only open browser in local development
     if environment == 'development' and host in ('127.0.0.1', 'localhost'):
         def launch():
             open_in_chrome(f'http://localhost:{port}')
         Timer(1.5, launch).start()
     
-    # Use waitress for development, gunicorn for production
     if environment == 'development':
         from waitress import serve
-        print(f"Starting development server on {host}:{port}")
+        print(f"Starting server on {host}:{port} (Web Speech Mode Active)")
         serve(app, host=host, port=port)
     else:
-        # Production - let gunicorn handle it
         print(f"Running in production mode on port {port}")
