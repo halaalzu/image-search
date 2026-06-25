@@ -590,7 +590,7 @@
             }
             isRecording = false;
 
-            const filename = photo.src.split('/').pop();
+            const filename = photo.src.replace('images/', '');
             const photoData = allQuestions[filename];
             const promptText = photoData ? (photoData.prompt || photoData.question) : '';
             console.log('Photo data:', filename, photoData);

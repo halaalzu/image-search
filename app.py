@@ -23,7 +23,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
 # Load configuration
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(os.path.join(BASE_DIR, 'config.ini'))
 
 TRUSTWORTHY_FOLDER = config.get('paths', 'trustworthy_folder', fallback='static/images/trustworthy')
 UNTRUSTWORTHY_FOLDER = config.get('paths', 'untrustworthy_folder', fallback='static/images/untrustworthy')
@@ -67,7 +67,7 @@ def index():
     feedback_countdown = FEEDBACK_COUNTDOWN
     automation_popup_delay = AUTOMATION_POPUP_DELAY
 
-    with open(QUESTIONS_FILE) as f:
+    with open(os.path.join(BASE_DIR, QUESTIONS_FILE)) as f:
         questions = json.load(f)
 
     photos = []
