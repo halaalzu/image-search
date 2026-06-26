@@ -752,7 +752,7 @@
         }
 
         function processUserAnswer(userAnswer) {
-            const filename = photos[index].src.split('/').pop();
+            const filename = photos[index].src.replace('images/', '');
             const correctAnswer = allQuestions[filename] ? allQuestions[filename].real_answer : null;
             
             if (!correctAnswer) {
