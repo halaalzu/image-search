@@ -61,7 +61,6 @@ def add_cache_headers(response):
 @app.route('/')
 def index():
     duration = DEFAULT_DURATION
-    selected_set = DEFAULT_SET
     automation = AUTOMATION_ENABLED
     recording_duration = RECORDING_DURATION
     feedback_countdown = FEEDBACK_COUNTDOWN
@@ -70,12 +69,41 @@ def index():
     with open(os.path.join(BASE_DIR, QUESTIONS_FILE)) as f:
         questions = json.load(f)
 
-    photos = []
-    for filename in SETS[selected_set]:
-        data = questions.get(filename, {})
-        photos.append({'src': f'images/{filename}',
-                        'question': data.get('question', '')
-                        })
+    def folder_files(folder_name):
+        folder_path = os.path.join(BASE_DIR, 'static', 'images', folder_name)
+        if not os.path.isdir(folder_path):
+            return []
+        return sorted(
+            filename for filename in os.listdir(folder_path)
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
+        )
+
+    def build_sequence():
+        layout = [
+            ('baseline', 2),
+            ('reliable', 3),
+            ('unreliable', 3),
+            ('reliable', 3),
+        ]
+        photos = []
+
+        for folder_name, count in layout:
+            files = folder_files(folder_name)
+            if not files:
+                continue
+
+            for i in range(count):
+                filename = files[i % len(files)]
+                key = f'{folder_name}/{filename}'
+                data = questions.get(key, {})
+                photos.append({
+                    'src': f'images/{key}',
+                    'question': data.get('question', ''),
+                })
+
+        return photos
+
+    photos = build_sequence()
     
     session['automation'] = automation
     session['photos'] = photos

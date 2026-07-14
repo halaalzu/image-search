@@ -103,6 +103,54 @@
             display: block;
         }
 
+        #progress-container {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        #progress-text {
+            font-size: 1rem;
+            color: #fff;
+            margin: 0 auto 6px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.45);
+            display: block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            width: min(920px, calc(100% - 32px));
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+        }
+
+        #progress-detail {
+            font-size: 0.95rem;
+            color: #fff;
+            margin: 0 auto 8px;
+            text-align: center;
+            opacity: 0.92;
+            display: block;
+            width: min(920px, calc(100% - 32px));
+        }
+
+        .progress-shell {
+            width: 100%;
+            height: 6px;
+            border-radius: 0;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(31, 41, 55, 0.6) 0%, rgba(79, 70, 229, 0.75) 55%, rgba(34, 197, 94, 0.72) 100%);
+        }
+
         #photo-container {
             width: 100%;
             height: 100%;
@@ -116,6 +164,10 @@
             max-width: 100vw;
             max-height: 100vh;
             object-fit: contain;
+        }
+
+        #current-photo.blurred {
+            filter: blur(28px) brightness(0.45);
         }
 
         #photo-instruction {
@@ -135,11 +187,9 @@
         #modal-overlay {
             display: none;
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(6px);
             z-index: 100;
             align-items: center;
             justify-content: center;
@@ -207,56 +257,116 @@
             display: block;
         }
 
-        #automation-popup {
+        #automation-inline {
             display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #d3d3d3;
-            border: 3px solid #808080;
-            padding: 40px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-align: center;
-            z-index: 150;
-            max-width: 400px;
+            margin: 14px 0;
+            background: #e6e6e6;
+            border: 2px solid #9a9a9a;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            padding: 14px 12px;
+            text-align: center;
         }
 
-        #automation-popup.show {
+        #automation-inline.show {
             display: block;
-            animation: slideIn 0.3s ease-out;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -60%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-        }
-
-        #automation-popup p {
+        #automation-inline p {
             margin: 0;
             color: #404040;
         }
 
-        #automation-popup .label {
+        #automation-inline .label {
             font-size: 0.8rem;
             color: #404040;
             margin-bottom: 10px;
             opacity: 0.8;
         }
 
-        #automation-popup .answer {
-            font-size: 2.2rem;
+        #automation-inline .answer {
+            font-size: 1.8rem;
             color: #606060;
             margin-top: 10px;
+        }
+
+        #automation-inline .question {
+            font-size: 1.2rem;
+            color: #222;
+            margin-top: 12px;
+            font-weight: 700;
+        }
+
+        #ai-transition {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 120;
+            align-items: center;
+            justify-content: center;
+            background: rgba(70, 70, 70, 0.35);
+            backdrop-filter: blur(2px);
+        }
+
+        #ai-transition.show {
+            display: flex;
+        }
+
+        #ai-transition .message {
+            width: min(500px, calc(100% - 32px));
+            background: #d3d3d3;
+            color: #404040;
+            border: 3px solid #808080;
+            padding: 36px 30px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 2.1rem;
+            font-weight: bold;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+        }
+
+        #ai-transition .subtitle {
+            display: none;
+        }
+
+        #fullscreen-intro {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 180;
+            align-items: center;
+            justify-content: center;
+            background: rgba(70, 70, 70, 0.35);
+            color: #404040;
+            text-align: center;
+            padding: 24px;
+        }
+
+        #fullscreen-intro.show {
+            display: flex;
+        }
+
+        #fullscreen-intro .panel {
+            width: min(500px, calc(100% - 32px));
+            background: #d3d3d3;
+            border: 3px solid #808080;
+            padding: 36px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+        }
+
+        #fullscreen-intro .eyebrow {
+            display: none;
+        }
+
+        #fullscreen-intro .title {
+            font-size: 2.1rem;
+            font-weight: bold;
+            line-height: 1.15;
+            margin-bottom: 0;
+        }
+
+        #fullscreen-intro .subtitle {
+            display: none;
         }
 
         #instructions-screen {
@@ -271,7 +381,7 @@
 <body>
     <div id="start-screen" class="container">
         <h1>Image Counting Task</h1>
-        <button onclick="startMicTest()">Start</button>
+        <button onclick="startMicTest()">Begin</button>
     </div>
 
     <div id="test-screen" class="container">
@@ -279,27 +389,27 @@
         
         <div id="test-step-1">
             <div class="instruction-box">
-                <strong>Step 1: Count Test</strong><br>
-                Click below and count from 1 to 10
+                <strong>Step 1: Number Check</strong><br>
+                Select the button below and count from 1 to 10.
             </div>
-            <button id="record-count-btn" onclick="recordCount()">🎤 Count 1-10</button>
+            <button id="record-count-btn" onclick="recordCount()">Record 1 to 10</button>
             <div id="count-transcript" class="transcript-box" style="display:none;"></div>
-            <button id="accept-count-btn" onclick="acceptCount()" style="display:none;">✓ Accept Count</button>
+            <button id="accept-count-btn" onclick="acceptCount()" style="display:none;">Continue</button>
         </div>
 
         <div id="test-step-2" style="display:none;">
             <div class="instruction-box">
-                <strong>Step 2: Format Test</strong><br>
-                Click below and say: "There are 5 red trucks"
+                <strong>Step 2: Response Format Check</strong><br>
+                Select the button below and say: "There are 5 red trucks"
             </div>
-            <button id="record-format-btn" onclick="recordFormat()">🎤 Say Format</button>
+            <button id="record-format-btn" onclick="recordFormat()">Record Response Format</button>
             <div id="format-transcript" class="transcript-box" style="display:none;"></div>
-            <button id="accept-format-btn" onclick="acceptFormat()" style="display:none;">✓ Accept Format</button>
+            <button id="accept-format-btn" onclick="acceptFormat()" style="display:none;">Continue</button>
         </div>
 
         <div id="test-complete" style="display:none;">
             <div class="instruction-box" style="background: #d4edda; border-left-color: #28a745;">
-                ✓ Microphone test complete!
+                Microphone check complete.
             </div>
             <button onclick="startInstructions()">Continue to Instructions</button>
         </div>
@@ -309,7 +419,8 @@
         <h1>Task Instructions</h1>
         <div class="instruction-box">
             <strong>Your Task:</strong><br><br>
-            You will see photos of vehicles. For each photo, count the vehicles and respond by saying:<br><br>
+            You will review 11 images in total.<br><br>
+            For each image, count the vehicles and respond using this format:<br><br>
             <strong>"There are [NUMBER] [COLOR] [VEHICLE]"</strong><br><br>
             Examples:<br>
             • "There are 4 blue cars"<br>
@@ -318,42 +429,56 @@
         </div>
         <div class="instruction-box">
             <strong>How it works:</strong><br><br>
-            1. A photo will appear on screen<br>
-            2. Say your answer in the format above<br>
-            3. Your answer will be shown<br>
-            4. Move to the next photo
+            1. You will see 11 photos in order<br>
+            2. After the baseline images, the remaining images are shown in three separate AI assistant blocks<br>
+            3. After each image, provide your spoken response and then choose whether to accept or reject the AI suggestion<br>
+            4. After each AI block, provide a rating from 1 to 5
         </div>
         <div class="instruction-box">
-            <strong>AI Assistance:</strong><br><br>
-            An AI will also try to count the objects and provide suggested answers; these suggestions are optional and shown to help you.
+            <strong>AI Suggestions:</strong><br><br>
+            The system may provide an optional suggested answer. You may accept it or keep your original response.
         </div>
-        <button onclick="startSlideshow()">Start Activity</button>
+        <button onclick="startSlideshow()">Begin Activity</button>
     </div>
 
     <div id="slideshow-area">
+        <div id="progress-container">
+            <div id="progress-text">Photo 1 of 11</div>
+            <div id="progress-detail">Baseline</div>
+            <div class="progress-shell"><div id="progress-bar" class="progress-bar"></div></div>
+        </div>
+        <div id="fullscreen-intro">
+            <div class="panel">
+                <div class="title">You will now begin the activity.</div>
+            </div>
+        </div>
         <div id="photo-container">
             <div id="photo-instruction"></div>
             <img id="current-photo" src="">
         </div>
 
+        <div id="ai-transition">
+            <div class="message" id="ai-transition-text"></div>
+        </div>
+
         <div id="modal-overlay">
             <div id="answer-modal">
                 <h2 id="modal-title"></h2>
-                <p id="instructions">Listening...</p>
+                <p id="instructions">Listening for your response...</p>
                 
                 <div id="transcript"></div>
+                <div id="automation-inline">
+                    <div class="label">Suggested AI Answer:</div>
+                    <div class="question">Please say "accept" or "reject".</div>
+                    <div class="answer" id="automation-answer-value"></div>
+                </div>
                 <div id="transcript-buttons" style="display:none; margin-top: 20px;">
-                    <button onclick="acceptTranscript()" style="background: #28a745; margin-right: 10px;">✓ That's Correct</button>
-                    <button onclick="rejectTranscript()" style="background: #dc3545;">Try Again</button>
+                    <button onclick="acceptTranscript()" style="background: #28a745; margin-right: 10px;">Use This Response</button>
+                    <button onclick="rejectTranscript()" style="background: #dc3545;">Record Again</button>
                 </div>
                 <div id="feedback"></div>
                 <div id="countdown"></div>
             </div>
-        </div>
-
-        <div id="automation-popup">
-            <div class="label">Automation Answer:</div>
-            <div class="answer" id="automation-answer-value"></div>
         </div>
     </div>
 
@@ -377,6 +502,19 @@
         let sessionId = null;
         let isCountingDown = false;
         let activeRecognition = null;
+        let currentPhotoData = null;
+        let currentQuestionText = '';
+        let currentUserAnswer = '';
+        let currentAutomationAnswer = null;
+        let currentDecision = '';
+        let currentAssistantLabel = 'Baseline';
+        let fullscreenIntroTimer = null;
+        let fullscreenLaunchTimer = null;
+        let slideshowStarted = false;
+        const SECRET_SKIP_CORNER_SIZE = 96;
+        const DECISION_CONFIRM_DELAY_MS = 700;
+        const TOTAL_PHOTOS = 11;
+        const TRANSITION_DURATION = 5600;
 
         // Get session ID on page load
         fetch('/get-session-id')
@@ -413,7 +551,7 @@
 
                 if (!SpeechRecognition) {
                     if (displayElement) {
-                        displayElement.innerHTML = '<div style="color: red;">❌ Speech recognition not supported in this browser</div>';
+                        displayElement.innerHTML = '<div style="color: red;">Speech recognition is not supported in this browser.</div>';
                     }
                     resolve(null);
                     return;
@@ -430,7 +568,7 @@
                 let maxTimer = null;
 
                 if (displayElement) {
-                    displayElement.innerHTML = '<div style="color: #666;">🎤 Recording... please speak</div>';
+                    displayElement.innerHTML = '<div style="color: #666;">Recording. Please speak.</div>';
                 }
 
                 function finish(result) {
@@ -452,7 +590,7 @@
                         }
                     }
                     if (displayElement) {
-                        displayElement.innerHTML = '<div>🎤 You: ' + (finalTranscript + interim) + '</div>';
+                        displayElement.innerHTML = '<div>You: ' + (finalTranscript + interim) + '</div>';
                     }
                 };
 
@@ -463,7 +601,7 @@
                         return;
                     }
                     if (displayElement && !finalTranscript.trim()) {
-                        displayElement.innerHTML = '<div style="color: red;">❌ ' + event.error + '</div>';
+                        displayElement.innerHTML = '<div style="color: red;">' + event.error + '</div>';
                     }
                     finish(finalTranscript.trim() || null);
                 };
@@ -477,9 +615,136 @@
                 } catch (e) {
                     console.error('Failed to start recognition:', e);
                     if (displayElement) {
-                        displayElement.innerHTML = '<div style="color: red;">❌ Microphone error</div>';
+                        displayElement.innerHTML = '<div style="color: red;">Microphone error</div>';
                     }
                     resolve(null);
+                    return;
+                }
+
+                maxTimer = setTimeout(() => {
+                    try { recognition.stop(); } catch (e) {}
+                }, (maxDuration || 5) * 1000);
+            });
+        }
+
+        function parseDecisionCommand(text) {
+            const lowered = String(text || '')
+                .toLowerCase()
+                .replace(/[^a-z\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            if (!lowered) {
+                return null;
+            }
+
+            const acceptPatterns = [
+                /\baccept\b/,
+                /\baccepted\b/,
+                /\bexcept\b/,
+                /\baccept it\b/,
+                /\bi accept\b/
+            ];
+
+            const rejectPatterns = [
+                /\breject\b/,
+                /\brejected\b/,
+                /\breject it\b/,
+                /\bi reject\b/,
+                /\bdecline\b/
+            ];
+
+            if (acceptPatterns.some((pattern) => pattern.test(lowered))) {
+                return 'accept';
+            }
+
+            if (rejectPatterns.some((pattern) => pattern.test(lowered))) {
+                return 'reject';
+            }
+
+            return null;
+        }
+
+        function captureDecisionCommand(maxDuration, displayElement) {
+            return new Promise((resolve) => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                if (!SpeechRecognition) {
+                    if (displayElement) {
+                        displayElement.innerHTML = '<div style="color: red;">Speech recognition is not supported in this browser.</div>';
+                    }
+                    resolve({ command: null, transcript: null });
+                    return;
+                }
+
+                const recognition = new SpeechRecognition();
+                activeRecognition = recognition;
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                let finalTranscript = '';
+                let settled = false;
+                let maxTimer = null;
+
+                if (displayElement) {
+                    displayElement.innerHTML = '<div style="color: #666;">Listening for "accept" or "reject".</div>';
+                }
+
+                function finish(command, transcript) {
+                    if (settled) return;
+                    settled = true;
+                    if (maxTimer) clearTimeout(maxTimer);
+                    activeRecognition = null;
+                    try { recognition.stop(); } catch (e) {}
+                    resolve({ command, transcript: transcript || null });
+                }
+
+                recognition.onresult = (event) => {
+                    let interim = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const chunk = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += chunk + ' ';
+                        } else {
+                            interim += chunk;
+                        }
+                    }
+
+                    const combined = (finalTranscript + interim).trim();
+                    if (displayElement) {
+                        displayElement.innerHTML = '<div>You: ' + combined + '</div>';
+                    }
+
+                    const command = parseDecisionCommand(combined);
+                    if (command) {
+                        finish(command, combined);
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Decision recognition error:', event.error);
+                    const command = parseDecisionCommand(finalTranscript);
+                    if (command) {
+                        finish(command, finalTranscript.trim());
+                        return;
+                    }
+                    finish(null, finalTranscript.trim() || null);
+                };
+
+                recognition.onend = () => {
+                    const command = parseDecisionCommand(finalTranscript);
+                    finish(command, finalTranscript.trim() || null);
+                };
+
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.error('Failed to start decision recognition:', e);
+                    if (displayElement) {
+                        displayElement.innerHTML = '<div style="color: red;">Microphone error</div>';
+                    }
+                    resolve({ command: null, transcript: null });
                     return;
                 }
 
@@ -537,20 +802,77 @@
             document.getElementById('instructions-screen').classList.add('active');
         }
 
+        function skipMicSetupToInstructions() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('test-screen').style.display = 'none';
+            document.getElementById('instructions-screen').classList.add('active');
+        }
+
+        function hideAutomationSuggestion() {
+            document.getElementById('automation-inline').classList.remove('show');
+        }
+
+        function showAutomationSuggestion(answerText) {
+            document.getElementById('automation-answer-value').innerText = answerText;
+            document.getElementById('automation-inline').classList.add('show');
+        }
+
         function startSlideshow() {
             document.getElementById('instructions-screen').classList.remove('active');
             document.getElementById('slideshow-area').classList.add('active');
-            
-            try {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Fullscreen request failed:', err);
-                });
-            } catch (e) {
-                console.log('Fullscreen not supported:', e);
-            }
-            
             index = 0;
-            loadQuestions().then(() => showPhoto());
+
+            const beginSlideshow = (delay) => {
+                if (slideshowStarted) {
+                    return;
+                }
+                slideshowStarted = true;
+
+                if (fullscreenIntroTimer) {
+                    clearTimeout(fullscreenIntroTimer);
+                    fullscreenIntroTimer = null;
+                }
+                if (fullscreenLaunchTimer) {
+                    clearTimeout(fullscreenLaunchTimer);
+                    fullscreenLaunchTimer = null;
+                }
+
+                fullscreenIntroTimer = setTimeout(() => {
+                    document.getElementById('fullscreen-intro').classList.remove('show');
+                    loadQuestions().then(() => showPhoto());
+                }, delay);
+            };
+
+            const onFullscreenChange = () => {
+                if (document.fullscreenElement) {
+                    document.removeEventListener('fullscreenchange', onFullscreenChange);
+                    beginSlideshow(1100);
+                }
+            };
+
+            document.getElementById('fullscreen-intro').classList.add('show');
+            document.addEventListener('fullscreenchange', onFullscreenChange);
+
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        document.removeEventListener('fullscreenchange', onFullscreenChange);
+                        console.log('Fullscreen request failed:', err);
+                        beginSlideshow(250);
+                    });
+                } else {
+                    document.removeEventListener('fullscreenchange', onFullscreenChange);
+                    beginSlideshow(250);
+                }
+            } catch (e) {
+                document.removeEventListener('fullscreenchange', onFullscreenChange);
+                console.log('Fullscreen not supported:', e);
+                beginSlideshow(250);
+            }
+
+            fullscreenLaunchTimer = setTimeout(() => {
+                beginSlideshow(250);
+            }, 2500);
         }
 
         async function loadQuestions() {
@@ -575,8 +897,10 @@
             console.log('Displaying photo:', photo.src);
             
             document.getElementById('current-photo').src = '/static/' + photo.src;
+            document.getElementById('current-photo').classList.remove('blurred');
             document.getElementById('modal-overlay').classList.remove('show');
-            document.getElementById('automation-popup').classList.remove('show');
+            hideAutomationSuggestion();
+            document.getElementById('ai-transition').classList.remove('show');
             clearInterval(countdownInterval);
             
             if (automationPopupTimeout) {
@@ -591,21 +915,13 @@
             isRecording = false;
 
             const filename = photo.src.replace('images/', '');
-            const photoData = allQuestions[filename];
-            const promptText = photoData ? (photoData.prompt || photoData.question) : '';
-            console.log('Photo data:', filename, photoData);
-            document.getElementById('photo-instruction').innerText = promptText;
+            currentPhotoData = allQuestions[filename] || {};
+            currentQuestionText = currentPhotoData ? (currentPhotoData.prompt || currentPhotoData.question || '') : '';
+            console.log('Photo data:', filename, currentPhotoData);
+            document.getElementById('photo-instruction').innerText = currentQuestionText;
 
-            const isBaseline = filename.toLowerCase().includes('baseline');
-            if (automation && photoData && photoData.automation_answer && !isBaseline) {
-                const delay = (automationPopupDelay || 1) * 1000;
-                console.log('Setting automation popup timeout for', delay, 'ms');
-                automationPopupTimeout = setTimeout(() => {
-                    console.log('Showing automation popup');
-                    document.getElementById('automation-answer-value').innerText = photoData.automation_answer;
-                    document.getElementById('automation-popup').classList.add('show');
-                }, delay);
-            }
+            currentAssistantLabel = getAssistantLabelForPhoto(index);
+            updateProgress();
 
             const modalDelay = (duration || 2) * 1000;
             console.log('Setting modal timeout for', modalDelay, 'ms');
@@ -620,10 +936,11 @@
             
             const questionText = extractQuestionText(photo.question);
             document.getElementById('modal-title').innerText = 'How many ' + questionText.toLowerCase() + '?';
-            document.getElementById('instructions').innerText = 'Listening...';
+            document.getElementById('instructions').innerText = 'Listening for your response...';
             document.getElementById('transcript').innerText = '';
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('countdown').innerText = '';
+            document.getElementById('current-photo').classList.add('blurred');
 
             console.log('Adding show class to modal-overlay');
             document.getElementById('modal-overlay').classList.add('show');
@@ -633,11 +950,7 @@
         }
 
         async function startRecording() {
-            if (automationPopupTimeout) {
-                clearTimeout(automationPopupTimeout);
-                automationPopupTimeout = null;
-            }
-            document.getElementById('automation-popup').classList.remove('show');
+            hideAutomationSuggestion();
             
             if (isRecording) {
                 return;
@@ -646,17 +959,17 @@
             isRecording = true;
             
             try {
-                document.getElementById('instructions').innerText = '🎤 Recording... Speak your answer';
+                document.getElementById('instructions').innerText = 'Recording. Please speak your answer.';
                 
                 const finalTranscript = await captureAndTranscribe(recordingDuration || 5, document.getElementById('transcript'));
                 
                 if (finalTranscript && finalTranscript.trim()) {
-                    document.getElementById('transcript').innerText = '🎤 You: ' + finalTranscript.trim();
+                    document.getElementById('transcript').innerText = 'You: ' + finalTranscript.trim();
                     setTimeout(() => {
                         acceptTranscript();
                     }, 500);
                 } else {
-                    document.getElementById('transcript').innerText = '❌ No answer detected';
+                    document.getElementById('transcript').innerText = 'No response detected.';
                     document.getElementById('instructions').innerText = '';
                     setTimeout(() => {
                         acceptTranscript();
@@ -664,9 +977,9 @@
                 }
             } catch (error) {
                 console.error('Recording error:', error);
-                document.getElementById('transcript').innerText = 'Microphone access denied';
+                document.getElementById('transcript').innerText = 'Microphone access denied.';
                 document.getElementById('transcript-buttons').style.display = 'block';
-                document.getElementById('instructions').innerText = 'Try again';
+                document.getElementById('instructions').innerText = 'Please try again.';
             } finally {
                 isRecording = false;
             }
@@ -684,19 +997,19 @@
             
             const transcriptText = document.getElementById('transcript').innerText;
             
-            if (transcriptText.includes('No answer detected') || !transcriptText.trim()) {
-                document.getElementById('instructions').innerText = '❌ No answer detected. Please try again.';
+            if (transcriptText.includes('No response detected.') || !transcriptText.trim()) {
+                document.getElementById('instructions').innerText = 'No response detected. Please try again.';
                 document.getElementById('transcript-buttons').style.display = 'none';
                 setTimeout(() => {
                     rejectTranscript();
                 }, 1500);
             } else {
-                const userAnswer = transcriptText.replace('🎤 You: ', '').trim();
+                const userAnswer = transcriptText.replace('You: ', '').trim();
                 if (userAnswer) {
                     // Check if a number was detected in the answer
                     const userNumber = extractFirstNumber(userAnswer);
                     if (userNumber === null) {
-                        document.getElementById('instructions').innerText = '⚠️ I didn\'t hear a number. Please say the count again.';
+                        document.getElementById('instructions').innerText = 'No number was detected. Please say the count again.';
                         document.getElementById('transcript-buttons').style.display = 'none';
                         setTimeout(() => {
                             rejectTranscript();
@@ -706,7 +1019,7 @@
                         processUserAnswer(userAnswer);
                     }
                 } else {
-                    document.getElementById('instructions').innerText = '❌ No answer detected. Please try again.';
+                    document.getElementById('instructions').innerText = 'No response detected. Please try again.';
                     document.getElementById('transcript-buttons').style.display = 'none';
                     setTimeout(() => {
                         rejectTranscript();
@@ -725,7 +1038,7 @@
             }
             document.getElementById('transcript').innerText = '';
             document.getElementById('transcript-buttons').style.display = 'none';
-            document.getElementById('instructions').innerText = 'Recording again...';
+            document.getElementById('instructions').innerText = 'Recording again.';
             isRecording = false;
             setTimeout(() => {
                 startRecording();
@@ -752,69 +1065,129 @@
         }
 
         function processUserAnswer(userAnswer) {
+            currentUserAnswer = userAnswer;
             const filename = photos[index].src.replace('images/', '');
-            const correctAnswer = allQuestions[filename] ? allQuestions[filename].real_answer : null;
-            
+            currentPhotoData = allQuestions[filename] || {};
+            currentAutomationAnswer = currentPhotoData.automation_answer || null;
+            currentQuestionText = currentPhotoData.question || '';
+
+            const correctAnswer = currentPhotoData.real_answer;
             if (!correctAnswer) {
                 document.getElementById('feedback').innerHTML = 'No answer key found';
-                startCountdown();
+                startCountdown(afterResponseStep);
                 return;
             }
 
-            const userNumber = extractFirstNumber(userAnswer);
-            
-            // If no number was detected, ask user to repeat
-            if (userNumber === null) {
-                document.getElementById('feedback').innerHTML = '';
-                document.getElementById('instructions').innerText = '⚠️ I didn\'t catch a number. Please try again.';
-                setTimeout(() => {
-                    rejectTranscript();
-                }, 1500);
+            if (automation && currentAutomationAnswer && !filename.toLowerCase().includes('baseline')) {
+                showAutomationDecisionStage();
                 return;
             }
-            
-            const isCorrect = userNumber === correctAnswer;
+
+            finalizeAnswer(userAnswer, correctAnswer, currentPhotoData.question || 'Unknown', null, null);
+        }
+
+        function showAutomationDecisionStage() {
+            showAutomationSuggestion(currentAutomationAnswer);
+            document.getElementById('instructions').innerText = 'Please say "accept" to use the suggested answer or "reject" to keep your response.';
+            document.getElementById('transcript').innerText = '';
+            startDecisionRecording();
+        }
+
+        async function startDecisionRecording() {
+            if (isRecording) {
+                return;
+            }
+
+            isRecording = true;
+            try {
+                const decisionResult = await captureDecisionCommand(recordingDuration || 5, document.getElementById('transcript'));
+                if (decisionResult.transcript && decisionResult.transcript.trim()) {
+                    document.getElementById('transcript').innerText = 'You: ' + decisionResult.transcript.trim();
+                }
+
+                if (decisionResult.command) {
+                    document.getElementById('instructions').innerText = 'Heard: ' + decisionResult.command + '. Continuing...';
+                    setTimeout(() => {
+                        processDecision(decisionResult.command);
+                    }, DECISION_CONFIRM_DELAY_MS);
+                } else {
+                    document.getElementById('transcript').innerText = 'No response detected.';
+                    document.getElementById('instructions').innerText = 'Please say "accept" or "reject".';
+                    setTimeout(() => {
+                        processDecision('');
+                    }, DECISION_CONFIRM_DELAY_MS);
+                }
+            } finally {
+                isRecording = false;
+            }
+        }
+
+        function processDecision(decisionText) {
+            const parsedDecision = parseDecisionCommand(decisionText);
+            if (parsedDecision === 'accept') {
+                currentDecision = 'accept';
+                finalizeAnswer(currentUserAnswer, currentPhotoData.real_answer, currentPhotoData.question || 'Unknown', currentDecision, currentAutomationAnswer);
+                return;
+            }
+            if (parsedDecision === 'reject') {
+                currentDecision = 'reject';
+                finalizeAnswer(currentUserAnswer, currentPhotoData.real_answer, currentPhotoData.question || 'Unknown', currentDecision, currentAutomationAnswer);
+                return;
+            }
+
+            document.getElementById('instructions').innerText = 'Please say "accept" or "reject".';
+            startDecisionRecording();
+        }
+
+        function finalizeAnswer(userAnswer, correctAnswer, question, decision, automationAnswer) {
+            hideAutomationSuggestion();
+
+            const isBaselinePhoto = getAssistantLabelForPhoto(index) === 'Baseline';
+            const finalAnswer = decision === 'accept' && automationAnswer ? String(automationAnswer) : String(userAnswer);
+            const initialNumber = extractFirstNumber(userAnswer);
+            const finalNumber = extractFirstNumber(finalAnswer);
+            const isCorrect = finalNumber !== null && finalNumber === correctAnswer;
+            const initialAnswerText = initialNumber !== null ? String(initialNumber) : 'No number detected';
+            const finalAnswerText = finalNumber !== null ? String(finalNumber) : 'No number detected';
 
             let feedbackText = '';
             if (isCorrect) {
-                feedbackText = `<div class="feedback correct">✓ Correct!</div>`;
+                feedbackText = `<div class="feedback correct">Correct.</div>`;
             } else {
-                feedbackText = `<div class="feedback incorrect">✗ Incorrect. The answer is <strong>${correctAnswer}</strong></div>`;
+                feedbackText = `<div class="feedback incorrect">Incorrect. The correct answer is <strong>${correctAnswer}</strong>.</div>`;
             }
 
-            if (automation) {
-                const isBaseline = filename.toLowerCase().includes('baseline');
-                const automationAnswer = allQuestions[filename] ? allQuestions[filename].automation_answer : null;
-                if (automationAnswer && !isBaseline) {
-                    feedbackText += `<div style="font-size: 0.9rem; color: #666; margin-top: 5px;">Automation answer: ${automationAnswer}</div>`;
+            if (!isBaselinePhoto) {
+                feedbackText += `<div style="margin-top: 12px; font-size: 1rem; font-weight: normal; color: #333;">Initial answer: ${initialAnswerText}</div>`;
+                feedbackText += `<div style="font-size: 1rem; font-weight: normal; color: #333;">Final answer: ${finalAnswerText}</div>`;
+                if (automationAnswer !== null && automationAnswer !== undefined) {
+                    feedbackText += `<div style="font-size: 1rem; font-weight: normal; color: #333;">Automation answer: ${automationAnswer}</div>`;
                 }
             }
 
             document.getElementById('feedback').innerHTML = feedbackText;
-            
+
             if (sessionId) {
-                const question = allQuestions[filename] ? allQuestions[filename].question : 'Unknown';
+                const filename = photos[index].src.replace('images/', '');
                 fetch('/save-response', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         image_filename: filename,
                         question: question,
-                        user_response: userAnswer,
+                        user_response: finalAnswer,
                         correct_answer: correctAnswer,
-                        is_correct: isCorrect
+                        is_correct: isCorrect,
+                        automation_decision: decision,
+                        automation_answer: automationAnswer
                     })
-                }).then(r => r.json())
-                  .then(data => {
-                      console.log('Response saved:', data);
-                      startCountdown();
-                  })
-                  .catch(err => {
-                      console.error('Error saving response:', err);
-                      startCountdown();
-                  });
+                }).then(() => {
+                    startCountdown(afterResponseStep);
+                }).catch(() => {
+                    startCountdown(afterResponseStep);
+                });
             } else {
-                startCountdown();
+                startCountdown(afterResponseStep);
             }
         }
 
@@ -824,7 +1197,7 @@
             }
         }
 
-        function startCountdown() {
+        function startCountdown(onComplete) {
             if (isCountingDown) {
                 return;
             }
@@ -840,9 +1213,143 @@
                 } else {
                     clearInterval(countdownInterval);
                     isCountingDown = false;
-                    nextPhoto();
+                    if (typeof onComplete === 'function') {
+                        onComplete();
+                    }
                 }
             }, 1000);
+        }
+
+        function afterResponseStep() {
+            if (isSurveyPhoto(index)) {
+                showSurvey();
+            } else {
+                nextPhoto();
+            }
+        }
+
+        function showSurvey() {
+            document.getElementById('instructions').innerText = 'Please say a number from 1 to 5.';
+            document.getElementById('transcript').innerText = '';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('countdown').innerText = '';
+            hideAutomationSuggestion();
+            document.getElementById('modal-overlay').classList.add('show');
+            document.getElementById('current-photo').classList.add('blurred');
+            document.getElementById('modal-title').innerText = 'Please rate the output quality of ' + getSurveyLabelForPhoto(index) + ' on a scale of 1 to 5.';
+
+            updateProgress();
+
+            recordSurvey();
+        }
+
+        async function recordSurvey() {
+            if (isRecording) {
+                return;
+            }
+
+            isRecording = true;
+            try {
+                const surveyTranscript = await captureAndTranscribe(recordingDuration || 5, document.getElementById('transcript'));
+                if (surveyTranscript && surveyTranscript.trim()) {
+                    const rating = extractFirstNumber(surveyTranscript.trim());
+                    if (rating && rating >= 1 && rating <= 5) {
+                        document.getElementById('feedback').innerHTML = `<div class="feedback correct">Recorded: ${rating}</div>`;
+                        if (sessionId) {
+                            const filename = photos[index].src.replace('images/', '');
+                            const question = currentPhotoData.question || 'Unknown';
+                            fetch('/save-response', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    image_filename: filename,
+                                    question: question + ' survey',
+                                    user_response: String(rating),
+                                    correct_answer: null,
+                                    is_correct: null,
+                                    survey_rating: rating
+                                })
+                            }).catch(() => {});
+                        }
+                        setTimeout(() => {
+                            advanceAfterSurvey();
+                        }, 800);
+                        return;
+                    }
+                }
+
+                document.getElementById('feedback').innerHTML = '<div class="feedback incorrect">Please say a number from 1 to 5.</div>';
+                setTimeout(() => {
+                    recordSurvey();
+                }, 900);
+            } finally {
+                isRecording = false;
+            }
+        }
+
+        function advanceAfterSurvey() {
+            document.getElementById('modal-overlay').classList.remove('show');
+            document.getElementById('current-photo').classList.remove('blurred');
+            if (index === 4) {
+                showAiTransition('The following images will be evaluated with AI Assistant #2.', () => {
+                    nextPhoto();
+                });
+            } else if (index === 7) {
+                showAiTransition('The following images will be evaluated with AI Assistant #3.', () => {
+                    nextPhoto();
+                });
+            } else {
+                endSlideshow();
+            }
+        }
+
+        function showAiTransition(label, onComplete) {
+            document.getElementById('ai-transition-text').innerText = label;
+            document.getElementById('ai-transition').classList.add('show');
+            document.getElementById('modal-overlay').classList.remove('show');
+            hideAutomationSuggestion();
+            document.getElementById('current-photo').classList.add('blurred');
+
+            setTimeout(() => {
+                document.getElementById('ai-transition').classList.remove('show');
+                if (typeof onComplete === 'function') {
+                    onComplete();
+                }
+            }, TRANSITION_DURATION);
+        }
+
+        function updateProgress() {
+            const currentPhotoNumber = Math.min(index + 1, TOTAL_PHOTOS);
+            document.getElementById('progress-text').innerText = 'Photo ' + currentPhotoNumber + ' of ' + TOTAL_PHOTOS;
+            document.getElementById('progress-detail').innerText = currentAssistantLabel;
+            document.getElementById('progress-bar').style.width = Math.min((currentPhotoNumber / TOTAL_PHOTOS) * 100, 100) + '%';
+        }
+
+        function getAssistantLabelForPhoto(photoIndex) {
+            if (photoIndex < 2) {
+                return 'Baseline';
+            }
+            if (photoIndex < 5) {
+                return 'AI Assistant 1';
+            }
+            if (photoIndex < 8) {
+                return 'AI Assistant 2';
+            }
+            return 'AI Assistant 3';
+        }
+
+        function getSurveyLabelForPhoto(photoIndex) {
+            if (photoIndex < 5) {
+                return 'AI Assistant #1';
+            }
+            if (photoIndex < 8) {
+                return 'AI Assistant #2';
+            }
+            return 'AI Assistant #3';
+        }
+
+        function isSurveyPhoto(photoIndex) {
+            return photoIndex === 4 || photoIndex === 7 || photoIndex === 10;
         }
 
         function nextPhoto() {
@@ -854,7 +1361,7 @@
                 clearTimeout(automationPopupTimeout);
                 automationPopupTimeout = null;
             }
-            document.getElementById('automation-popup').classList.remove('show');
+            hideAutomationSuggestion();
             if (activeRecognition) {
                 try { activeRecognition.stop(); } catch (e) {}
             }
@@ -864,6 +1371,10 @@
             index++;
             if (index >= photos.length) {
                 endSlideshow();
+            } else if (index === 2) {
+                showAiTransition('The following images will be evaluated with AI Assistant #1.', () => {
+                    showPhoto();
+                });
             } else {
                 showPhoto();
             }
@@ -875,9 +1386,22 @@
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                if (document.fullscreenElement) document.exitFullscreen();
-                window.location.href = '/';
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
             }
+        });
+
+        document.addEventListener('click', function(e) {
+            const insideTopRightCorner = e.clientX >= (window.innerWidth - SECRET_SKIP_CORNER_SIZE)
+                && e.clientY <= SECRET_SKIP_CORNER_SIZE;
+            const slideshowActive = document.getElementById('slideshow-area').classList.contains('active');
+
+            if (!insideTopRightCorner || slideshowActive) {
+                return;
+            }
+
+            skipMicSetupToInstructions();
         });
     </script>
 </body>

@@ -1,0 +1,150 @@
+{
+  "session_id": "20260710_122248_00696195",
+  "created_at": "2026-07-10T12:22:48.454228",
+  "responses": [
+    {
+      "timestamp": "2026-07-10T12:24:45.529000",
+      "image_filename": "baseline/GreenSemi.png",
+      "question": "How many GREEN SEMI-TRUCKS are there?",
+      "user_response": "are you good to go at 12:30",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:07:41.568295",
+      "image_filename": "baseline/OrangeCar.png",
+      "question": "How many ORANGE CARS are there?",
+      "user_response": "cuz I need a call really but you're in one",
+      "correct_answer": 5,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:39:40.014569",
+      "image_filename": "baseline/GreenSemi.png",
+      "question": "How many GREEN SEMI-TRUCKS are there?",
+      "user_response": "five four",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:40:06.115956",
+      "image_filename": "baseline/OrangeCar.png",
+      "question": "How many ORANGE CARS are there?",
+      "user_response": "there are three orange cars",
+      "correct_answer": 5,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:41:19.507131",
+      "image_filename": "reliable/OrangeSemi.png",
+      "question": "How many ORANGE SEMI-TRUCKS are there?",
+      "user_response": "5",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-10T13:42:09.374475",
+      "image_filename": "reliable/PinkVan.png",
+      "question": "How many PINK VANS are there?",
+      "user_response": "5",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-10T13:43:44.991246",
+      "image_filename": "reliable/PurpleCar.png",
+      "question": "How many PURPLE CARS are there?",
+      "user_response": "please send evaluation of new tests five",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:43:59.389126",
+      "image_filename": "reliable/PurpleCar.png",
+      "question": "How many PURPLE CARS are there? survey",
+      "user_response": "3",
+      "correct_answer": null,
+      "is_correct": null
+    },
+    {
+      "timestamp": "2026-07-10T13:44:45.904630",
+      "image_filename": "baseline/GreenSemi.png",
+      "question": "How many GREEN SEMI-TRUCKS are there?",
+      "user_response": "three",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:45:56.095179",
+      "image_filename": "baseline/OrangeCar.png",
+      "question": "How many ORANGE CARS are there?",
+      "user_response": "four five",
+      "correct_answer": 5,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:46:26.941010",
+      "image_filename": "reliable/OrangeSemi.png",
+      "question": "How many ORANGE SEMI-TRUCKS are there?",
+      "user_response": "5",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-10T13:48:49.482237",
+      "image_filename": "baseline/GreenSemi.png",
+      "question": "How many GREEN SEMI-TRUCKS are there?",
+      "user_response": "next to pay our Center so this one's next weekend",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:55:13.493429",
+      "image_filename": "baseline/OrangeCar.png",
+      "question": "How many ORANGE CARS are there?",
+      "user_response": "5 years outbreakable Hunters",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-10T13:58:00.113864",
+      "image_filename": "reliable/OrangeSemi.png",
+      "question": "How many ORANGE SEMI-TRUCKS are there?",
+      "user_response": "5",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-10T13:58:39.222942",
+      "image_filename": "reliable/PinkVan.png",
+      "question": "How many PINK VANS are there?",
+      "user_response": "three",
+      "correct_answer": 5,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-10T13:59:14.126959",
+      "image_filename": "reliable/PurpleCar.png",
+      "question": "How many PURPLE CARS are there?",
+      "user_response": "6",
+      "correct_answer": 6,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-10T14:02:14.532677",
+      "image_filename": "reliable/PurpleCar.png",
+      "question": "How many PURPLE CARS are there? survey",
+      "user_response": "1",
+      "correct_answer": null,
+      "is_correct": null
+    },
+    {
+      "timestamp": "2026-07-10T14:04:47.689702",
+      "image_filename": "unreliable/GreenCar.png",
+      "question": "How many GREEN CARS are there?",
+      "user_response": "8",
+      "correct_answer": 9,
+      "is_correct": false
+    }
+  ]
+}

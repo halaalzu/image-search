@@ -1,0 +1,62 @@
+{
+  "session_id": "20260709_142034_6e534070",
+  "created_at": "2026-07-09T14:20:34.192297",
+  "responses": [
+    {
+      "timestamp": "2026-07-09T14:21:30.503732",
+      "image_filename": "baseline/GreenSemi.png",
+      "question": "How many GREEN SEMI-TRUCKS are there?",
+      "user_response": "green semi trucks five",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-09T14:26:44.781424",
+      "image_filename": "baseline/GreenSemi.png",
+      "question": "How many GREEN SEMI-TRUCKS are there?",
+      "user_response": "there are three green sandwiches",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-09T14:27:01.450386",
+      "image_filename": "baseline/OrangeCar.png",
+      "question": "How many ORANGE CARS are there?",
+      "user_response": "there are five orange cars",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-09T14:29:29.724281",
+      "image_filename": "reliable/OrangeSemi.png",
+      "question": "How many ORANGE SEMI-TRUCKS are there?",
+      "user_response": "they're five orange semi trucks",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-09T14:31:38.040746",
+      "image_filename": "reliable/PinkVan.png",
+      "question": "How many PINK VANS are there?",
+      "user_response": "there are five pink bands",
+      "correct_answer": 5,
+      "is_correct": true
+    },
+    {
+      "timestamp": "2026-07-09T14:32:31.840719",
+      "image_filename": "reliable/PurpleCar.png",
+      "question": "How many PURPLE CARS are there?",
+      "user_response": "there are three purple cars",
+      "correct_answer": 6,
+      "is_correct": false
+    },
+    {
+      "timestamp": "2026-07-09T14:33:06.395385",
+      "image_filename": "reliable/PurpleCar.png",
+      "question": "How many PURPLE CARS are there? survey",
+      "user_response": "3",
+      "correct_answer": null,
+      "is_correct": null
+    }
+  ]
+}
