@@ -69,37 +69,31 @@ def index():
     with open(os.path.join(BASE_DIR, QUESTIONS_FILE)) as f:
         questions = json.load(f)
 
-    def folder_files(folder_name):
-        folder_path = os.path.join(BASE_DIR, 'static', 'images', folder_name)
-        if not os.path.isdir(folder_path):
-            return []
-        return sorted(
-            filename for filename in os.listdir(folder_path)
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
-        )
+    def resolve_question_key(image_ref):
+        if image_ref in questions:
+            return image_ref
+
+        if '/' in image_ref:
+            return image_ref
+
+        for folder_name in ['baseline', 'reliable', 'unreliable']:
+            candidate = f'{folder_name}/{image_ref}'
+            if candidate in questions:
+                return candidate
+
+        return image_ref
 
     def build_sequence():
-        layout = [
-            ('baseline', 2),
-            ('reliable', 3),
-            ('unreliable', 3),
-            ('reliable', 3),
-        ]
+        image_refs = SETS.get(DEFAULT_SET, [])
         photos = []
 
-        for folder_name, count in layout:
-            files = folder_files(folder_name)
-            if not files:
-                continue
-
-            for i in range(count):
-                filename = files[i % len(files)]
-                key = f'{folder_name}/{filename}'
-                data = questions.get(key, {})
-                photos.append({
-                    'src': f'images/{key}',
-                    'question': data.get('question', ''),
-                })
+        for image_ref in image_refs:
+            key = resolve_question_key(image_ref)
+            data = questions.get(key, {})
+            photos.append({
+                'src': f'images/{image_ref}',
+                'question': data.get('question', ''),
+            })
 
         return photos
 

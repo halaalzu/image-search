@@ -419,7 +419,7 @@
         <h1>Task Instructions</h1>
         <div class="instruction-box">
             <strong>Your Task:</strong><br><br>
-            You will review 11 images in total.<br><br>
+            You will review the photos in the configured set in order.<br><br>
             For each image, count the vehicles and respond using this format:<br><br>
             <strong>"There are [NUMBER] [COLOR] [VEHICLE]"</strong><br><br>
             Examples:<br>
@@ -513,7 +513,6 @@
         let slideshowStarted = false;
         const SECRET_SKIP_CORNER_SIZE = 96;
         const DECISION_CONFIRM_DELAY_MS = 700;
-        const TOTAL_PHOTOS = 11;
         const TRANSITION_DURATION = 5600;
 
         // Get session ID on page load
@@ -828,51 +827,14 @@
                 }
                 slideshowStarted = true;
 
-                if (fullscreenIntroTimer) {
-                    clearTimeout(fullscreenIntroTimer);
-                    fullscreenIntroTimer = null;
-                }
-                if (fullscreenLaunchTimer) {
-                    clearTimeout(fullscreenLaunchTimer);
-                    fullscreenLaunchTimer = null;
-                }
-
                 fullscreenIntroTimer = setTimeout(() => {
                     document.getElementById('fullscreen-intro').classList.remove('show');
                     loadQuestions().then(() => showPhoto());
                 }, delay);
             };
 
-            const onFullscreenChange = () => {
-                if (document.fullscreenElement) {
-                    document.removeEventListener('fullscreenchange', onFullscreenChange);
-                    beginSlideshow(1100);
-                }
-            };
-
             document.getElementById('fullscreen-intro').classList.add('show');
-            document.addEventListener('fullscreenchange', onFullscreenChange);
-
-            try {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen().catch(err => {
-                        document.removeEventListener('fullscreenchange', onFullscreenChange);
-                        console.log('Fullscreen request failed:', err);
-                        beginSlideshow(250);
-                    });
-                } else {
-                    document.removeEventListener('fullscreenchange', onFullscreenChange);
-                    beginSlideshow(250);
-                }
-            } catch (e) {
-                document.removeEventListener('fullscreenchange', onFullscreenChange);
-                console.log('Fullscreen not supported:', e);
-                beginSlideshow(250);
-            }
-
-            fullscreenLaunchTimer = setTimeout(() => {
-                beginSlideshow(250);
-            }, 2500);
+            beginSlideshow(250);
         }
 
         async function loadQuestions() {
@@ -1319,10 +1281,11 @@
         }
 
         function updateProgress() {
-            const currentPhotoNumber = Math.min(index + 1, TOTAL_PHOTOS);
-            document.getElementById('progress-text').innerText = 'Photo ' + currentPhotoNumber + ' of ' + TOTAL_PHOTOS;
+            const totalPhotos = photos.length || 0;
+            const currentPhotoNumber = Math.min(index + 1, totalPhotos || 1);
+            document.getElementById('progress-text').innerText = 'Photo ' + currentPhotoNumber + ' of ' + totalPhotos;
             document.getElementById('progress-detail').innerText = currentAssistantLabel;
-            document.getElementById('progress-bar').style.width = Math.min((currentPhotoNumber / TOTAL_PHOTOS) * 100, 100) + '%';
+            document.getElementById('progress-bar').style.width = totalPhotos ? Math.min((currentPhotoNumber / totalPhotos) * 100, 100) + '%' : '0%';
         }
 
         function getAssistantLabelForPhoto(photoIndex) {
