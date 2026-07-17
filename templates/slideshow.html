@@ -430,9 +430,9 @@
         <div class="instruction-box">
             <strong>How it works:</strong><br><br>
             1. You will see 11 photos in order<br>
-            2. After the baseline images, the remaining images are shown in three separate AI assistant blocks<br>
+            2. After the baseline images, the remaining images are shown in three sets of photos<br>
             3. After each image, provide your spoken response and then choose whether to accept or reject the AI suggestion<br>
-            4. After each AI block, provide a rating from 1 to 5
+            4. After each set, provide a rating from 1 to 5, where 1 = Very poor and 5 = Very good
         </div>
         <div class="instruction-box">
             <strong>AI Suggestions:</strong><br><br>
@@ -1229,14 +1229,14 @@
         }
 
         function showSurvey() {
-            document.getElementById('instructions').innerText = 'Please say a number from 1 to 5.';
+            document.getElementById('instructions').innerText = 'Please say a number from 1 to 5, where 1 = Very poor and 5 = Very good.';
             document.getElementById('transcript').innerText = '';
             document.getElementById('feedback').innerHTML = '';
             document.getElementById('countdown').innerText = '';
             hideAutomationSuggestion();
             document.getElementById('modal-overlay').classList.add('show');
             document.getElementById('current-photo').classList.add('blurred');
-            document.getElementById('modal-title').innerText = 'Please rate the output quality of ' + getSurveyLabelForPhoto(index) + ' on a scale of 1 to 5.';
+            document.getElementById('modal-title').innerText = 'Please rate the output quality of ' + getSurveyLabelForPhoto(index) + ' on a scale of 1 to 5 (1 = Very poor; 5 = Very good).';
 
             updateProgress();
 
@@ -1291,11 +1291,11 @@
             document.getElementById('modal-overlay').classList.remove('show');
             document.getElementById('current-photo').classList.remove('blurred');
             if (index === 4) {
-                showAiTransition('The following images will be evaluated with AI Assistant #2.', () => {
+                showAiTransition('The following images will be evaluated as Set 2.', () => {
                     nextPhoto();
                 });
             } else if (index === 7) {
-                showAiTransition('The following images will be evaluated with AI Assistant #3.', () => {
+                showAiTransition('The following images will be evaluated as Set 3.', () => {
                     nextPhoto();
                 });
             } else {
@@ -1330,22 +1330,22 @@
                 return 'Baseline';
             }
             if (photoIndex < 5) {
-                return 'AI Assistant 1';
+                return 'Set 1';
             }
             if (photoIndex < 8) {
-                return 'AI Assistant 2';
+                return 'Set 2';
             }
-            return 'AI Assistant 3';
+            return 'Set 3';
         }
 
         function getSurveyLabelForPhoto(photoIndex) {
             if (photoIndex < 5) {
-                return 'AI Assistant #1';
+                return 'Set 1';
             }
             if (photoIndex < 8) {
-                return 'AI Assistant #2';
+                return 'Set 2';
             }
-            return 'AI Assistant #3';
+            return 'Set 3';
         }
 
         function isSurveyPhoto(photoIndex) {
@@ -1372,7 +1372,15 @@
             if (index >= photos.length) {
                 endSlideshow();
             } else if (index === 2) {
-                showAiTransition('The following images will be evaluated with AI Assistant #1.', () => {
+                showAiTransition('The following images will be evaluated as Set 1.', () => {
+                    showPhoto();
+                });
+            } else if (index === 5) {
+                showAiTransition('The following images will be evaluated as Set 2.', () => {
+                    showPhoto();
+                });
+            } else if (index === 8) {
+                showAiTransition('The following images will be evaluated as Set 3.', () => {
                     showPhoto();
                 });
             } else {
