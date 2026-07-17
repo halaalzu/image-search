@@ -449,7 +449,7 @@
         </div>
         <div id="fullscreen-intro">
             <div class="panel">
-                <div class="title">You will now begin the activity.</div>
+                <div class="title">The trial will start now.</div>
             </div>
         </div>
         <div id="photo-container">
@@ -833,8 +833,36 @@
                 }, delay);
             };
 
+            const onFullscreenChange = () => {
+                if (document.fullscreenElement) {
+                    document.removeEventListener('fullscreenchange', onFullscreenChange);
+                    beginSlideshow(2200);
+                }
+            };
+
             document.getElementById('fullscreen-intro').classList.add('show');
-            beginSlideshow(250);
+            document.addEventListener('fullscreenchange', onFullscreenChange);
+
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        document.removeEventListener('fullscreenchange', onFullscreenChange);
+                        console.log('Fullscreen request failed:', err);
+                        beginSlideshow(2200);
+                    });
+                } else {
+                    document.removeEventListener('fullscreenchange', onFullscreenChange);
+                    beginSlideshow(2200);
+                }
+            } catch (e) {
+                document.removeEventListener('fullscreenchange', onFullscreenChange);
+                console.log('Fullscreen not supported:', e);
+                beginSlideshow(2200);
+            }
+
+            setTimeout(() => {
+                beginSlideshow(2200);
+            }, 2500);
         }
 
         async function loadQuestions() {
