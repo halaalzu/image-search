@@ -820,6 +820,7 @@
             document.getElementById('instructions-screen').classList.remove('active');
             document.getElementById('slideshow-area').classList.add('active');
             index = 0;
+            const introDelay = 3200;
 
             const beginSlideshow = (delay) => {
                 if (slideshowStarted) {
@@ -836,7 +837,7 @@
             const onFullscreenChange = () => {
                 if (document.fullscreenElement) {
                     document.removeEventListener('fullscreenchange', onFullscreenChange);
-                    beginSlideshow(2200);
+                    beginSlideshow(introDelay);
                 }
             };
 
@@ -848,21 +849,21 @@
                     document.documentElement.requestFullscreen().catch(err => {
                         document.removeEventListener('fullscreenchange', onFullscreenChange);
                         console.log('Fullscreen request failed:', err);
-                        beginSlideshow(2200);
+                        beginSlideshow(introDelay);
                     });
                 } else {
                     document.removeEventListener('fullscreenchange', onFullscreenChange);
-                    beginSlideshow(2200);
+                    beginSlideshow(introDelay);
                 }
             } catch (e) {
                 document.removeEventListener('fullscreenchange', onFullscreenChange);
                 console.log('Fullscreen not supported:', e);
-                beginSlideshow(2200);
+                beginSlideshow(introDelay);
             }
 
             setTimeout(() => {
-                beginSlideshow(2200);
-            }, 2500);
+                beginSlideshow(introDelay);
+            }, introDelay + 300);
         }
 
         async function loadQuestions() {

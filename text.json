@@ -65,7 +65,7 @@
     "real_answer": 14 },
  "baseline/RedCar.png": { 
    "question": "How many RED CARS are there?",
-   "prompt": "Count the number of red vans",
+   "prompt": "Count the number of red cars",
     "real_answer": 9 },
  "reliable/OrangeSemi.png": {
     "question": "How many ORANGE SEMI-TRUCKS are there?",
